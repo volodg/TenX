@@ -55,9 +55,10 @@ final class SquareMatrix<Element> {
     
     reinitIfNeeded()
     
-    values.reserveCapacity(newEdgeSize * newEdgeSize)
+    let newSize = newEdgeSize * newEdgeSize
+    values.reserveCapacity(newSize)
     
-    let additionalSize = newEdgeSize * newEdgeSize - values.count
+    let additionalSize = newSize - values.count
     
     for _ in 0..<additionalSize {
       values.append(defValue)

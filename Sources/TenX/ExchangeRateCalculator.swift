@@ -5,23 +5,28 @@
 //  Created by Volodymyr  Gorbenko on 24/12/17.
 //
 
-final class ExchangeRateCalculator {
-  
-  private let rate = SquareMatrix<Double>(defValue: .infinity)
-  private let next = SquareMatrix<Int?>(defValue: nil)
+protocol IndexType: Equatable {
+  var index: Int { get }
+}
 
+final class ExchangeRateCalculator<Index: IndexType> {
+  
+  //TODO use Decimal type instead of Double
+  private let rate = SquareMatrix<Double>(defValue: .infinity)
+  private let next = SquareMatrix<Index?>(defValue: nil)
+  
   //TODO make it template to remove dependence on type
   //TODO test
-  func updateBestRatesTable(exchangesVertex: ExchangesVertex) {
+  func updateBestRatesTable(elements: [(source: Index, destination: Index, weight: Double)]) {
     
     let currenciesCount = exchangesVertex.currenciesCount
     
     rate.reallocate(newEdgeSize: currenciesCount)
     next.reallocate(newEdgeSize: currenciesCount)
     
-    exchangesVertex.forEach { info in
-      rate[(info.sourceIndex, info.destinationIndex)] = info.exchangeInfo.weight
-      next[(info.sourceIndex, info.destinationIndex)] = info.destinationIndex
+    for info in elements {
+      rate[(info.source.index, info.destination.index)] = info.weight
+      next[(info.source.index, info.destination.index)] = info.destination
     }
     
     for k in 0..<currenciesCount {
@@ -38,30 +43,17 @@ final class ExchangeRateCalculator {
   
   //TODO make it template to remove dependence on type
   //TODO test
-  func bestPath(source: Int, destination: Int) -> [Int] {
-    if next[(source, destination)] == nil {
+  func bestPath(source: Index, destination: Index) -> [Index] {
+    if next[(source.index, destination.index)] == nil {
       return []
     }
     var currentSource = source
     var result = [currentSource]
     while currentSource != destination {
-      currentSource = next[(currentSource, destination)]!
+      currentSource = next[(currentSource.index, destination.index)]!
       result.append(currentSource)
     }
     return result
   }
   
-  //TODO make it template to remove dependence on type
-  //TODO test
-  func bestPath(source: Currency, destination: Currency) -> [Currency] {
-    
-    let sourceIndex = exchangesVertex.currencyToIndexDict[source]!
-    let destinationIndex = exchangesVertex.currencyToIndexDict[destination]!
-    
-    let result = bestPath(source: sourceIndex, destination: destinationIndex)
-    
-    return result.map { exchangesVertex.indexToCurrencyDict[$0]! }
-  }
 }
-
-let exchangeRateCalculator = ExchangeRateCalculator()

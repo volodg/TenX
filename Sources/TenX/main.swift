@@ -11,7 +11,30 @@ import Foundation
 //TODO validate SOURCE != DESTINATION
 //TODO store exchanger
 
-//fillIndexes(vertexes: allVertexes)
+struct RateInfo {
+  let pair: Pair
+  let weight: Double
+}
+
+let testVertexes: [RateInfo] = [
+  RateInfo(pair: Pair(source: "1", destination: "2"), weight: 1),
+  RateInfo(pair: Pair(source: "1", destination: "3"), weight: 1),
+  RateInfo(pair: Pair(source: "2", destination: "3"), weight: 0.5),
+  RateInfo(pair: Pair(source: "3", destination: "2"), weight: 0.5),
+  RateInfo(pair: Pair(source: "2", destination: "4"), weight: 1),
+  RateInfo(pair: Pair(source: "3", destination: "4"), weight: 1),
+  RateInfo(pair: Pair(source: "3", destination: "6"), weight: 2),
+  RateInfo(pair: Pair(source: "4", destination: "6"), weight: 2),
+  RateInfo(pair: Pair(source: "3", destination: "5"), weight: 2),
+  RateInfo(pair: Pair(source: "4", destination: "5"), weight: 2),
+  RateInfo(pair: Pair(source: "6", destination: "5"), weight: 0.5),
+  RateInfo(pair: Pair(source: "5", destination: "6"), weight: 0.5),
+  RateInfo(pair: Pair(source: "6", destination: "7"), weight: 2),
+  RateInfo(pair: Pair(source: "5", destination: "7"), weight: 0.5),
+  //  RateInfo(pair: Pair(source: "7", destination: "5"), weight: 1),
+]
+
+let exchangesVertex = ExchangesVertex()
 
 testVertexes.forEach { vertex in
   
@@ -19,8 +42,26 @@ testVertexes.forEach { vertex in
   exchangesVertex.update(pair: vertex.pair, exchangeInfo: exchangeInfo)
 }
 
-exchangeRateCalculator.updateBestRatesTable(exchangesVertex: exchangesVertex)
+let exchangeRateCalculator = ExchangeRateCalculator<CurrencyIndex>()
 
-let result = exchangeRateCalculator.bestPath(source: "1", destination: "7")
+exchangeRateCalculator.updateBestRatesTable(elements: exchangesVertex.allEdges)
 
-print("best path: \(result)")
+func processBestPath() {
+  
+  guard let source = exchangesVertex.getIndex(for: "1") else {
+    print("invalid source")
+    return
+  }
+  
+  guard let destination = exchangesVertex.getIndex(for: "7") else {
+    print("invalid destination")
+    return
+  }
+  
+  let result = exchangeRateCalculator.bestPath(source: source, destination: destination)
+  
+  print("best path: \(result)")
+}
+
+processBestPath()
+

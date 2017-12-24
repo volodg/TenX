@@ -27,29 +27,6 @@ extension Pair: Hashable {
   }
 }
 
-struct Vertex {
-  let pair: Pair
-  let weight: Double
-}
-
-let testVertexes: [Vertex] = [
-  Vertex(pair: Pair(source: "1", destination: "2"), weight: 1),
-  Vertex(pair: Pair(source: "1", destination: "3"), weight: 1),
-  Vertex(pair: Pair(source: "2", destination: "3"), weight: 0.5),
-  Vertex(pair: Pair(source: "3", destination: "2"), weight: 0.5),
-  Vertex(pair: Pair(source: "2", destination: "4"), weight: 1),
-  Vertex(pair: Pair(source: "3", destination: "4"), weight: 1),
-  Vertex(pair: Pair(source: "3", destination: "6"), weight: 2),
-  Vertex(pair: Pair(source: "4", destination: "6"), weight: 2),
-  Vertex(pair: Pair(source: "3", destination: "5"), weight: 2),
-  Vertex(pair: Pair(source: "4", destination: "5"), weight: 2),
-  Vertex(pair: Pair(source: "6", destination: "5"), weight: 0.5),
-  Vertex(pair: Pair(source: "5", destination: "6"), weight: 0.5),
-  Vertex(pair: Pair(source: "6", destination: "7"), weight: 2),
-  Vertex(pair: Pair(source: "5", destination: "7"), weight: 0.5),
-  //  Vertex(pair: Pair(source: "7", destination: "5"), weight: 1),
-]
-
 struct ExchangeInfo {
   let exchanger: String
   let weight: Double
@@ -57,10 +34,27 @@ struct ExchangeInfo {
 }
 
 struct FullExchangeInfo {
-  let pair: Pair//do we need it?
   let exchangeInfo: ExchangeInfo
-  let sourceIndex: Int
-  let destinationIndex: Int
+  let source: CurrencyIndex
+  let destination: CurrencyIndex
+}
+
+struct CurrencyIndex {
+  let currency: Currency
+  let index: Int
+}
+
+extension CurrencyIndex: Hashable {
+  var hashValue: Int {
+    return currency.hashValue ^ index
+  }
+}
+
+extension CurrencyIndex: IndexType {
+  static func ==(lhs: CurrencyIndex, rhs: CurrencyIndex) -> Bool {
+    return lhs.currency == rhs.currency
+      && lhs.index == rhs.index
+  }
 }
 
 class ExchangesVertex {
@@ -72,18 +66,24 @@ class ExchangesVertex {
   }
   
   private var currentIndex = 0
-  /*private */var currencyToIndexDict = [Currency:Int]()
+  /*private */var currencyToIndexDict = [Currency:CurrencyIndex]()
+  //TODO remove this property
   /*private */var indexToCurrencyDict = [Int:Currency]()
   
   //TODO test
-  private func index(for currency: Currency) -> Int {
+  func getIndex(for currency: Currency) -> CurrencyIndex? {
+    return currencyToIndexDict[currency]
+  }
+  
+  //TODO test
+  private func createOrGetIndex(for currency: Currency) -> CurrencyIndex {
     if let result = currencyToIndexDict[currency] {
       return result
     }
     
-    currencyToIndexDict[currency] = currentIndex
+    let result = CurrencyIndex(currency: currency, index: currentIndex)
+    currencyToIndexDict[currency] = result
     indexToCurrencyDict[currentIndex] = currency
-    let result = currentIndex
     currentIndex += 1
     return result
   }
@@ -91,6 +91,14 @@ class ExchangesVertex {
   //TODO test
   func forEach(_ body: (FullExchangeInfo) -> Void) {
     exchangeInfoByPair.forEach { body($0.value) }
+  }
+  
+  typealias Edge = (source: CurrencyIndex, destination: CurrencyIndex, weight: Double)
+  
+  var allEdges: [Edge] {
+    return exchangeInfoByPair.map { (_, value) -> Edge in
+      return (value.source, value.destination, value.exchangeInfo.weight)
+    }
   }
   
   //TODO test
@@ -102,17 +110,11 @@ class ExchangesVertex {
       return
     }
     
-    let sourceIndex = index(for: pair.source)
-    let destinationIndex = index(for: pair.destination)
-    
     let newValue = FullExchangeInfo(
-      pair: pair,
       exchangeInfo: exchangeInfo,
-      sourceIndex: sourceIndex,
-      destinationIndex: destinationIndex)
+      source: createOrGetIndex(for: pair.source),
+      destination: createOrGetIndex(for: pair.destination))
     
     exchangeInfoByPair[pair] = newValue
   }
 }
-
-let exchangesVertex = ExchangesVertex()
