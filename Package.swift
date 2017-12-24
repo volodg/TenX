@@ -18,6 +18,9 @@ let package = Package(
     .library(
       name: "ExchangeRateCalculator",
       targets: ["ExchangeRateCalculator"]),
+    .library(
+      name: "RatesTable",
+      targets: ["RatesTable"]),
     ],
   dependencies: [
     // Dependencies declare other packages that this package depends on.
@@ -28,7 +31,7 @@ let package = Package(
     // Targets can depend on other targets in this package, and on products in packages which this package depends on.
     .target(
       name: "TenX",
-      dependencies: ["Parser", "ExchangeRateCalculator"]),
+      dependencies: ["Parser", "ExchangeRateCalculator", "RatesTable"]),
     .target(
       name: "Parser",
       dependencies: []),
@@ -38,6 +41,9 @@ let package = Package(
     .target(
       name: "ExchangeRateCalculator",
       dependencies: ["SquareMatrix"]),
+    .target(
+      name: "RatesTable",
+      dependencies: []),
     .testTarget(
       name: "TenXTests",
       dependencies: ["Parser"]),

@@ -1,6 +1,6 @@
 //
 //  SquareMatrix.swift
-//  TenX
+//  SquareMatrix
 //
 //  Created by Volodymyr  Gorbenko on 24/12/17.
 //

@@ -1,6 +1,6 @@
 //
 //  ExchangeRateCalculator.swift
-//  TenX
+//  Parser
 //
 //  Created by Volodymyr  Gorbenko on 24/12/17.
 //

@@ -1,67 +1,86 @@
 //
 //  Vertex.swift
-//  TenXPackageDescription
+//  RatesTable
 //
 //  Created by Volodymyr  Gorbenko on 24/12/17.
 //
 
 import Foundation
 
-struct Currency {
+public struct Currency {
   let rawValue: String
+  public init(rawValue: String) {
+    self.rawValue = rawValue
+  }
 }
 
 extension Currency: Equatable {
-  static func ==(lhs: Currency, rhs: Currency) -> Bool {
+  public static func ==(lhs: Currency, rhs: Currency) -> Bool {
     return lhs.rawValue == rhs.rawValue
   }
 }
 
 extension Currency: Hashable {
-  var hashValue: Int {
+  public var hashValue: Int {
     return rawValue.hashValue
   }
 }
 
-struct Exchange {
+public struct Exchange {
   let rawValue: String
+  public init(rawValue: String) {
+    self.rawValue = rawValue
+  }
 }
 
 extension Exchange: Equatable {
-  static func ==(lhs: Exchange, rhs: Exchange) -> Bool {
+  public static func ==(lhs: Exchange, rhs: Exchange) -> Bool {
     return lhs.rawValue == rhs.rawValue
   }
 }
 
 extension Exchange: Hashable {
-  var hashValue: Int {
+  public var hashValue: Int {
     return rawValue.hashValue
   }
 }
 
-struct RateInfo {
+public struct RateInfo {
   let source: Currency
   let destination: Currency
   let exchange: Exchange
   let weight: Double
   let backwardWeight: Double
   let date: Date
+  
+  public init(source: Currency, destination: Currency, exchange: Exchange, weight: Double, backwardWeight: Double, date: Date) {
+    self.source = source
+    self.destination = destination
+    self.exchange = exchange
+    self.weight = weight
+    self.backwardWeight = backwardWeight
+    self.date = date
+  }
 }
 
-struct Vertex {
+public struct Vertex {
   let currency: Currency
   let exchange: Exchange
+  public init(currency: Currency, exchange: Exchange) {
+    self.currency = currency
+    self.exchange = exchange
+  }
 }
 
 extension Vertex: Equatable {
-  static func ==(lhs: Vertex, rhs: Vertex) -> Bool {
+  public static func ==(lhs: Vertex, rhs: Vertex) -> Bool {
     return lhs.currency == rhs.currency
       && lhs.exchange == rhs.exchange
   }
 }
 
 extension Vertex: Hashable {
-  var hashValue: Int {
+  public var hashValue: Int {
     return currency.hashValue ^ exchange.hashValue
   }
 }
@@ -89,29 +108,36 @@ struct ExchangeInfo {
   let date: Date
 }
 
-struct FullExchangeInfo {
+public struct FullExchangeInfo {
   let exchangeInfo: ExchangeInfo
   let source: VertexIndex
   let destination: VertexIndex
 }
 
-struct VertexIndex {
+public struct VertexIndex {
   let vertex: Vertex
-  let index: Int
+  public let index: Int
 }
 
 extension VertexIndex: Hashable {
-  var hashValue: Int {
+  public static func ==(lhs: VertexIndex, rhs: VertexIndex) -> Bool {
+    return lhs.vertex == rhs.vertex
+      && lhs.index == rhs.index
+  }
+  
+  public var hashValue: Int {
     return vertex.hashValue ^ index
   }
 }
 
-final class ExchangesVertex {
+public final class RatesTable {
+  
+  public init() {}
   
   private var allExchangesByCurrency = [Currency:Set<Exchange>]()
   private var exchangeInfoByPair = [Pair:FullExchangeInfo]()
   
-  var currenciesCount: Int {
+  public var currenciesCount: Int {
     return currentIndex
   }
   
@@ -121,7 +147,7 @@ final class ExchangesVertex {
   /*private */var indexToVertexDict = [Int:Vertex]()
   
   //TODO test
-  func getIndex(for vertex: Vertex) -> VertexIndex? {
+  public func getIndex(for vertex: Vertex) -> VertexIndex? {
     return vertexToIndexDict[vertex]
   }
   
@@ -139,13 +165,13 @@ final class ExchangesVertex {
   }
   
   //TODO test
-  func forEach(_ body: (FullExchangeInfo) -> Void) {
+  public func forEach(_ body: (FullExchangeInfo) -> Void) {
     exchangeInfoByPair.forEach { body($0.value) }
   }
   
-  typealias Edge = (source: VertexIndex, destination: VertexIndex, weight: Double)
+  public typealias Edge = (source: VertexIndex, destination: VertexIndex, weight: Double)
   
-  var allEdges: [Edge] {
+  public var allEdges: [Edge] {
     return exchangeInfoByPair.map { (_, value) -> Edge in
       return (value.source, value.destination, value.exchangeInfo.weight)
     }
@@ -212,7 +238,7 @@ final class ExchangesVertex {
   }
   
   //TODO test
-  func update(rateInfo: RateInfo) {
+  public func update(rateInfo: RateInfo) {
     
     updateExchangesPairs(with: rateInfo)
     

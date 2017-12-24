@@ -7,7 +7,7 @@
 
 import Parser
 import Foundation
-import SquareMatrix
+import RatesTable
 import ExchangeRateCalculator
 
 //TODO validate SOURCE != DESTINATION
@@ -18,12 +18,7 @@ import ExchangeRateCalculator
 //3. > to <,
 //3. 0 to 1,
 
-extension VertexIndex: IndexType {
-  static func ==(lhs: VertexIndex, rhs: VertexIndex) -> Bool {
-    return lhs.vertex == rhs.vertex
-      && lhs.index == rhs.index
-  }
-}
+extension VertexIndex: IndexType {}
 
 extension RateInfo {
   
@@ -68,28 +63,28 @@ let testVertexes: [RateInfo] = [
 //  RateInfo(pair: Pair(source: "7", destination: "5"), weight: 1),
 ]
 
-let exchangesVertex = ExchangesVertex()
+let ratesTable = RatesTable()
 
 testVertexes.forEach { rateInfo in
-  exchangesVertex.update(rateInfo: rateInfo)
+  ratesTable.update(rateInfo: rateInfo)
 }
 
 let exchangeRateCalculator = ExchangeRateCalculator<VertexIndex>()
 
 exchangeRateCalculator.updateRatesTable(
-  currenciesCount: exchangesVertex.currenciesCount,
-  elements: exchangesVertex.allEdges)
+  currenciesCount: ratesTable.currenciesCount,
+  elements: ratesTable.allEdges)
 
 func processBestPath() {
   
   let sourceVertex = Vertex(currency: Currency(rawValue: "1"), exchange: Exchange(rawValue: "KRAKEN"))
-  guard let source = exchangesVertex.getIndex(for: sourceVertex) else {
+  guard let source = ratesTable.getIndex(for: sourceVertex) else {
     print("invalid source")
     return
   }
   
   let distanceVertex = Vertex(currency: Currency(rawValue: "7"), exchange: Exchange(rawValue: "KRAKEN"))
-  guard let destination = exchangesVertex.getIndex(for: distanceVertex) else {
+  guard let destination = ratesTable.getIndex(for: distanceVertex) else {
     print("invalid destination")
     return
   }
