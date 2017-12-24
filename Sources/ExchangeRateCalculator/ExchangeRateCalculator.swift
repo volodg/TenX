@@ -19,7 +19,6 @@ public final class ExchangeRateCalculator<Index: IndexType> {
   private let rate = SquareMatrix<Double>(defValue: .infinity)
   private let next = SquareMatrix<Index?>(defValue: nil)
   
-  //TODO make it template to remove dependence on type
   //TODO test
   public func updateRatesTable(currenciesCount: Int, elements: [(source: Index, destination: Index, weight: Double)]) {
     
@@ -43,10 +42,8 @@ public final class ExchangeRateCalculator<Index: IndexType> {
     }
   }
   
-  //TODO make it template to remove dependence on type
   //TODO test
-  //TODO rename
-  public func bestPath(source: Index, destination: Index) -> [Index] {
+  public func bestRatesPath(source: Index, destination: Index) -> [Index] {
     if next[(source.index, destination.index)] == nil {
       return []
     }

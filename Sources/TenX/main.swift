@@ -89,7 +89,9 @@ func processBestPath() {
     return
   }
   
-  let result = exchangeRateCalculator.bestPath(source: source, destination: destination)
+  let result = exchangeRateCalculator
+    .bestRatesPath(source: source, destination: destination)
+    .map { ($0.vertex.currency, $0.vertex.exchange) }
   
   print("best path: \(result)")
 }

@@ -64,8 +64,8 @@ public struct RateInfo {
 }
 
 public struct Vertex {
-  let currency: Currency
-  let exchange: Exchange
+  public let currency: Currency
+  public let exchange: Exchange
   public init(currency: Currency, exchange: Exchange) {
     self.currency = currency
     self.exchange = exchange
@@ -115,7 +115,7 @@ public struct FullExchangeInfo {
 }
 
 public struct VertexIndex {
-  let vertex: Vertex
+  public let vertex: Vertex
   public let index: Int
 }
 
