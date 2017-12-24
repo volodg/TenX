@@ -86,7 +86,8 @@ extension VertexIndex: IndexType {
 
 class ExchangesVertex {
   
-  /*private */var exchangeInfoByPair = [Pair:FullExchangeInfo]()
+  private var allExchangesByCurrency = [Currency:Set<Exchange>]()
+  private var exchangeInfoByPair = [Pair:FullExchangeInfo]()
   
   var currenciesCount: Int {
     return currentIndex
@@ -146,7 +147,52 @@ class ExchangesVertex {
   }
   
   //TODO test
+  private func updateExchangesPairs(with rateInfo: RateInfo, currency: Currency) {
+    
+    var allExchanges = allExchangesByCurrency[currency] ?? Set()
+    
+    guard !allExchanges.contains(rateInfo.exchange) else { return }
+    
+    let otherExchanges = allExchanges.subtracting([rateInfo.exchange])
+    
+    for exchange in otherExchanges {
+      
+      //update pair
+      let source = Vertex(currency: currency, exchange: rateInfo.exchange)
+      let destination = Vertex(currency: currency, exchange: exchange)
+      
+      let pair = Pair(source: source, destination: destination)
+      //TODO change on 1
+      let exchangeInfo = ExchangeInfo(weight: 0, date: rateInfo.date)
+      
+      update(pair: pair, exchangeInfo: exchangeInfo)
+      
+      //update backward pair
+      let backwardSource = Vertex(currency: currency, exchange: exchange)
+      let backwardDestination = Vertex(currency: currency, exchange: rateInfo.exchange)
+      
+      let backwardPair = Pair(source: backwardSource, destination: backwardDestination)
+      //TODO change on 1
+      let backwardExchangeInfo = ExchangeInfo(weight: 0, date: rateInfo.date)
+      
+      update(pair: backwardPair, exchangeInfo: backwardExchangeInfo)
+    }
+    
+    allExchanges.insert(rateInfo.exchange)
+    allExchangesByCurrency[currency] = allExchanges
+  }
+  
+  //TODO test
+  private func updateExchangesPairs(with rateInfo: RateInfo) {
+    
+    updateExchangesPairs(with: rateInfo, currency: rateInfo.source)
+    updateExchangesPairs(with: rateInfo, currency: rateInfo.destination)
+  }
+  
+  //TODO test
   func update(rateInfo: RateInfo) {
+    
+    updateExchangesPairs(with: rateInfo)
     
     //update pair
     let source = Vertex(currency: rateInfo.source, exchange: rateInfo.exchange)
@@ -162,7 +208,5 @@ class ExchangesVertex {
     let backwardExchangeInfo = ExchangeInfo(weight: rateInfo.backwardWeight, date: rateInfo.date)
     
     update(pair: backwardPair, exchangeInfo: backwardExchangeInfo)
-    
-    //update cross echangers pairs
   }
 }

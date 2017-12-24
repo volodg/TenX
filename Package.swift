@@ -6,11 +6,9 @@ import PackageDescription
 let package = Package(
   name: "TenX",
   products: [
-    // Products define the executables and libraries produced by a package, and make them visible to other packages.
     .executable(
       name: "TenX",
       targets: ["TenX"]),
-    // Products define the executables and libraries produced by a package, and make them visible to other packages.
     .library(
       name: "Parser",
       targets: ["Parser"]),
@@ -33,3 +31,4 @@ let package = Package(
       dependencies: ["Parser"]),
     ]
 )
+
