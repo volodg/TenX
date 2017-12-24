@@ -46,15 +46,15 @@ extension Exchange: Hashable {
   }
 }
 
-public struct RateInfo<WeightT: Monoid> {
-  let source: Currency
-  let destination: Currency
-  let exchange: Exchange
-  let weight: WeightT
-  let backwardWeight: WeightT
-  let date: Date
+public struct RateInfo {
+  public let source: Currency
+  public let destination: Currency
+  public let exchange: Exchange
+  public let weight: Double
+  public let backwardWeight: Double
+  public let date: Date
   
-  public init(source: Currency, destination: Currency, exchange: Exchange, weight: WeightT, backwardWeight: WeightT, date: Date) {
+  public init(source: Currency, destination: Currency, exchange: Exchange, weight: Double, backwardWeight: Double, date: Date) {
     self.source = source
     self.destination = destination
     self.exchange = exchange
@@ -86,31 +86,35 @@ extension Vertex: Hashable {
   }
 }
 
-struct Pair {
+public struct Pair {
   let source: Vertex
   let destination: Vertex
+  public init(source: Vertex, destination: Vertex) {
+    self.source = source
+    self.destination = destination
+  }
 }
 
 extension Pair: Equatable {
-  static func ==(lhs: Pair, rhs: Pair) -> Bool {
+  public static func ==(lhs: Pair, rhs: Pair) -> Bool {
     return lhs.source == rhs.source
       && lhs.destination == rhs.destination
   }
 }
 
 extension Pair: Hashable {
-  var hashValue: Int {
+  public var hashValue: Int {
     return source.hashValue ^ destination.hashValue
   }
 }
 
-struct ExchangeInfo<WeightT: Monoid> {
-  let weight: WeightT
+struct ExchangeInfo {
+  let weight: Double
   let date: Date
 }
 
-public struct FullExchangeInfo<WeightT: Monoid> {
-  let exchangeInfo: ExchangeInfo<WeightT>
+public struct FullExchangeInfo {
+  let exchangeInfo: ExchangeInfo
   let source: VertexIndex
   let destination: VertexIndex
 }

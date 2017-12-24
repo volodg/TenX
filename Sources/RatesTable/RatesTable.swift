@@ -8,12 +8,18 @@
 import Foundation
 import Commons
 
-public final class RatesTable<WeightT: Monoid> {
+public final class RatesTable {
   
   public init() {}
   
   private var allExchangesByCurrency = [Currency:Set<Exchange>]()
-  private var exchangeInfoByPair = [Pair:FullExchangeInfo<WeightT>]()
+  private var allExchanges = Set<Exchange>()
+  
+  public func getAllExchanges() -> Set<Exchange> {
+    return allExchanges
+  }
+  
+  private var exchangeInfoByPair = [Pair:FullExchangeInfo]()
   
   public var currenciesCount: Int {
     return currentIndex
@@ -40,11 +46,11 @@ public final class RatesTable<WeightT: Monoid> {
   }
   
   //TODO test
-  public func forEach(_ body: (FullExchangeInfo<WeightT>) -> Void) {
+  public func forEach(_ body: (FullExchangeInfo) -> Void) {
     exchangeInfoByPair.forEach { body($0.value) }
   }
   
-  public typealias Edge = (source: VertexIndex, destination: VertexIndex, weight: WeightT)
+  public typealias Edge = (source: VertexIndex, destination: VertexIndex, weight: Double)
   
   public var allEdges: [Edge] {
     return exchangeInfoByPair.map { (_, value) -> Edge in
@@ -53,7 +59,7 @@ public final class RatesTable<WeightT: Monoid> {
   }
   
   //TODO test
-  private func update(pair: Pair, exchangeInfo: ExchangeInfo<WeightT>) {
+  private func update(pair: Pair, exchangeInfo: ExchangeInfo) {
     
     if let oldExchangeInfo = exchangeInfoByPair[pair],
       exchangeInfo.date < oldExchangeInfo.exchangeInfo.date {
@@ -70,7 +76,7 @@ public final class RatesTable<WeightT: Monoid> {
   }
   
   //TODO test
-  private func updateExchangesPairs(with rateInfo: RateInfo<WeightT>, currency: Currency) {
+  private func updateExchangesPairs(with rateInfo: RateInfo, currency: Currency) {
     
     var allExchanges = allExchangesByCurrency[currency] ?? Set()
     
@@ -86,7 +92,7 @@ public final class RatesTable<WeightT: Monoid> {
       
       let pair = Pair(source: source, destination: destination)
       //TODO change weight on 1
-      let exchangeInfo = ExchangeInfo(weight: WeightT.unit(), date: rateInfo.date)
+      let exchangeInfo = ExchangeInfo(weight: 1, date: rateInfo.date)
       
       update(pair: pair, exchangeInfo: exchangeInfo)
       
@@ -96,7 +102,7 @@ public final class RatesTable<WeightT: Monoid> {
       
       let backwardPair = Pair(source: backwardSource, destination: backwardDestination)
       //TODO change weight on 1
-      let backwardExchangeInfo = ExchangeInfo(weight: WeightT.unit(), date: rateInfo.date)
+      let backwardExchangeInfo = ExchangeInfo(weight: 1, date: rateInfo.date)
       
       update(pair: backwardPair, exchangeInfo: backwardExchangeInfo)
     }
@@ -106,14 +112,17 @@ public final class RatesTable<WeightT: Monoid> {
   }
   
   //TODO test
-  private func updateExchangesPairs(with rateInfo: RateInfo<WeightT>) {
+  private func updateExchangesPairs(with rateInfo: RateInfo) {
     
     updateExchangesPairs(with: rateInfo, currency: rateInfo.source)
     updateExchangesPairs(with: rateInfo, currency: rateInfo.destination)
   }
   
   //TODO test
-  public func update(rateInfo: RateInfo<WeightT>) {
+  //TODO fix code duplication
+  public func update(rateInfo: RateInfo) {
+    
+    allExchanges.insert(rateInfo.exchange)
     
     updateExchangesPairs(with: rateInfo)
     
@@ -129,18 +138,18 @@ public final class RatesTable<WeightT: Monoid> {
     //update backward pair
     let backwardPair = Pair(source: destination, destination: source)
     let backwardExchangeInfo = ExchangeInfo(weight: rateInfo.backwardWeight, date: rateInfo.date)
-    
+
     update(pair: backwardPair, exchangeInfo: backwardExchangeInfo)
   }
   
-  public func getRate(for path: [VertexIndex]) -> WeightT? {
+  public func getRate(for path: [VertexIndex]) -> Double? {
     
     if path.count < 2 {
       return nil
     }
     
     var index = 1
-    var result = WeightT.unit()
+    var result = 1.0
     
     while index < path.count {
       let pair = Pair(source: path[index - 1].vertex, destination: path[index].vertex)
@@ -152,7 +161,7 @@ public final class RatesTable<WeightT: Monoid> {
         continue
       }
       
-      result = result.mappend(exchangeInfo.exchangeInfo.weight)
+      result = result * exchangeInfo.exchangeInfo.weight
     }
     
     return result

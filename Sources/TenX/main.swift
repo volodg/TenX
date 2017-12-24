@@ -11,72 +11,58 @@ import Foundation
 import RatesTable
 import ExchangeRateCalculator
 
+//TODO use Decimal type instead of Double
 //TODO validate input SOURCE != DESTINATION
-
-//TODO change math:
-//1. infinity to zero,
-//2. + to *,
-//3. > to <,
-//3. 0 to 1,
 
 extension VertexIndex: IndexType {}
 
-//TODO use Decimal type instead of Double
-typealias RateType = Double
-typealias RateMonoidType = SumNum<RateType>
-
-private let defaultRate = RateMonoidType.Sum(.infinity)
-
-//have to write free function because swift does not allow me to extend `SumNum` enum with protocol
-private func rateComparator(_ lhs: RateMonoidType, _ rhs: RateMonoidType) -> Bool {
-  switch  (lhs, rhs) {
-  case (.Sum(let v), .Sum(let v2)):
-    return v > v2
-  }
-}
-
-let testVertexes: [RateInfo<RateMonoidType>] = [
-  RateInfo(source: "1", destination: "2", exchange: "KRAKEN", weight: 1  , backwardWeight: 1.0, date: Date()),
-  RateInfo(source: "1", destination: "3", exchange: "KRAKEN", weight: 1  , backwardWeight: 1  , date: Date()),
-  RateInfo(source: "2", destination: "3", exchange: "KRAKEN", weight: 0.5, backwardWeight: 0.5, date: Date()),
-  RateInfo(source: "2", destination: "4", exchange: "KRAKEN", weight: 1  , backwardWeight: 1  , date: Date()),
-  RateInfo(source: "3", destination: "4", exchange: "KRAKEN", weight: 1  , backwardWeight: 1  , date: Date()),
-  RateInfo(source: "3", destination: "6", exchange: "KRAKEN", weight: 2  , backwardWeight: 2  , date: Date()),
-  RateInfo(source: "4", destination: "6", exchange: "KRAKEN", weight: 2  , backwardWeight: 2  , date: Date()),
-  RateInfo(source: "3", destination: "5", exchange: "KRAKEN", weight: 2  , backwardWeight: 2  , date: Date()),
-  RateInfo(source: "4", destination: "5", exchange: "KRAKEN", weight: 2  , backwardWeight: 2  , date: Date()),
-  RateInfo(source: "5", destination: "6", exchange: "KRAKEN", weight: 0.5, backwardWeight: 0.5, date: Date()),
-  RateInfo(source: "6", destination: "7", exchange: "KRAKEN", weight: 2  , backwardWeight: 2  , date: Date()),
-  RateInfo(source: "5", destination: "7", exchange: "KRAKEN", weight: 0.5, backwardWeight: 0.5, date: Date()),
-
-  RateInfo(source: "1", destination: "2", exchange: "GDAX", weight: 1  , backwardWeight: 1  , date: Date()),
-  RateInfo(source: "1", destination: "3", exchange: "GDAX", weight: 1  , backwardWeight: 1  , date: Date()),
-  RateInfo(source: "2", destination: "3", exchange: "GDAX", weight: 0.5, backwardWeight: 0.5, date: Date()),
-  RateInfo(source: "2", destination: "4", exchange: "GDAX", weight: 1  , backwardWeight: 1  , date: Date()),
-  RateInfo(source: "3", destination: "4", exchange: "GDAX", weight: 1  , backwardWeight: 1  , date: Date()),
-  RateInfo(source: "3", destination: "6", exchange: "GDAX", weight: 1  , backwardWeight: 2  , date: Date()),//
-  RateInfo(source: "4", destination: "6", exchange: "GDAX", weight: 2  , backwardWeight: 2  , date: Date()),
-  RateInfo(source: "3", destination: "5", exchange: "GDAX", weight: 2  , backwardWeight: 2  , date: Date()),
-  RateInfo(source: "4", destination: "5", exchange: "GDAX", weight: 2  , backwardWeight: 2  , date: Date()),
-  RateInfo(source: "5", destination: "6", exchange: "GDAX", weight: 0.5, backwardWeight: 0.5, date: Date()),
-  RateInfo(source: "6", destination: "7", exchange: "GDAX", weight: 1.7, backwardWeight: 2  , date: Date()),//here
-  RateInfo(source: "5", destination: "7", exchange: "GDAX", weight: 0.5, backwardWeight: 0.5, date: Date()),
+let testVertexes: [RateInfo] = [
+  RateInfo(source: "1", destination: "2", exchange: "KRAKEN", weight: 1.1,  backwardWeight: 0.9, date: Date()),
+  RateInfo(source: "1", destination: "3", exchange: "KRAKEN", weight: 0.5,  backwardWeight: 1  , date: Date()),
+  RateInfo(source: "2", destination: "3", exchange: "KRAKEN", weight: 0.5,  backwardWeight: 0.9, date: Date()),
+  RateInfo(source: "2", destination: "4", exchange: "KRAKEN", weight: 1  ,  backwardWeight: 1  , date: Date()),
+  RateInfo(source: "3", destination: "4", exchange: "KRAKEN", weight: 1  ,  backwardWeight: 0.9, date: Date()),
+  RateInfo(source: "3", destination: "5", exchange: "KRAKEN", weight: 0.5,  backwardWeight: 2  , date: Date()),
+  RateInfo(source: "3", destination: "6", exchange: "KRAKEN", weight: 0.5,  backwardWeight: 2  , date: Date()),
+  RateInfo(source: "4", destination: "5", exchange: "KRAKEN", weight: 0.45, backwardWeight: 2  , date: Date()),
+  RateInfo(source: "4", destination: "6", exchange: "KRAKEN", weight: 0.45, backwardWeight: 2  , date: Date()),
+  RateInfo(source: "5", destination: "6", exchange: "KRAKEN", weight: 1.0 , backwardWeight: 0.5, date: Date()),
+  RateInfo(source: "5", destination: "7", exchange: "KRAKEN", weight: 2   , backwardWeight: 0.5, date: Date()),
+  RateInfo(source: "6", destination: "7", exchange: "KRAKEN", weight: 0.5 , backwardWeight: 0.5, date: Date()),
+  
+  RateInfo(source: "1", destination: "2", exchange: "GDAX", weight: 1   , backwardWeight: 0.9, date: Date()),
+  RateInfo(source: "1", destination: "3", exchange: "GDAX", weight: 1   , backwardWeight: 1  , date: Date()),
+  RateInfo(source: "2", destination: "3", exchange: "GDAX", weight: 0.9 , backwardWeight: 0.5, date: Date()),
+  RateInfo(source: "2", destination: "4", exchange: "GDAX", weight: 1   , backwardWeight: 1  , date: Date()),
+  RateInfo(source: "3", destination: "4", exchange: "GDAX", weight: 1.1 , backwardWeight: 0.5, date: Date()),
+  RateInfo(source: "3", destination: "6", exchange: "GDAX", weight: 0.5 , backwardWeight: 1  , date: Date()),
+  RateInfo(source: "4", destination: "6", exchange: "GDAX", weight: 0.45, backwardWeight: 2  , date: Date()),
+  RateInfo(source: "3", destination: "5", exchange: "GDAX", weight: 0.5 , backwardWeight: 2  , date: Date()),
+  RateInfo(source: "4", destination: "5", exchange: "GDAX", weight: 0.45, backwardWeight: 2  , date: Date()),
+  RateInfo(source: "5", destination: "6", exchange: "GDAX", weight: 1.0 , backwardWeight: 0.5, date: Date()),
+  RateInfo(source: "6", destination: "7", exchange: "GDAX", weight: 0.6 , backwardWeight: 0.5, date: Date()),//here
+  RateInfo(source: "5", destination: "7", exchange: "GDAX", weight: 2  , backwardWeight: 0.5, date: Date()),
 //  RateInfo(pair: Pair(source: "7", destination: "5"), weight: 1),
 ]
 
-let ratesTable = RatesTable<RateMonoidType>()
+let exchangeRateCalculator = ExchangeRateCalculator<VertexIndex>()
+
+let ratesTable = RatesTable()
 
 testVertexes.forEach { rateInfo in
+  
+  guard rateInfo.isValid(ratesTable: ratesTable,
+                         exchangeRateCalculator: exchangeRateCalculator) else {
+    return
+  }
+  
   ratesTable.update(rateInfo: rateInfo)
+  
+  exchangeRateCalculator.updateRatesTable(
+    currenciesCount: ratesTable.currenciesCount,
+    elements: ratesTable.allEdges)
 }
 
-let exchangeRateCalculator = ExchangeRateCalculator<VertexIndex,RateMonoidType>(
-  defaultRate: defaultRate,
-  rateComparator: rateComparator)
-
-exchangeRateCalculator.updateRatesTable(
-  currenciesCount: ratesTable.currenciesCount,
-  elements: ratesTable.allEdges)
 
 func processBestPath() {
   
@@ -86,8 +72,8 @@ func processBestPath() {
     return
   }
   
-  let distanceVertex = Vertex(currency: Currency(rawValue: "7"), exchange: Exchange(rawValue: "KRAKEN"))
-  guard let destination = ratesTable.getIndex(for: distanceVertex) else {
+  let destinationVertex = Vertex(currency: Currency(rawValue: "7"), exchange: Exchange(rawValue: "KRAKEN"))
+  guard let destination = ratesTable.getIndex(for: destinationVertex) else {
     print("invalid destination")
     return
   }
@@ -99,8 +85,8 @@ func processBestPath() {
   
   let rate = ratesTable.getRate(for: vertexIndexes)
   
-  print("best path: \(result)")
-  print("best path: \(rate!)")
+  print("best path: \n\(result)")
+  print("best rate: \(rate!)")
 }
 
 processBestPath()

@@ -12,25 +12,17 @@ public protocol IndexType: Equatable {
   var index: Int { get }
 }
 
-public final class ExchangeRateCalculator<Index: IndexType, WeightT: Monoid> {
+public final class ExchangeRateCalculator<Index: IndexType> {
   
-  public typealias RateComparator = (_ lhs: WeightT, _ rhs: WeightT) -> Bool
+  public init() {}
   
-  private let defaultRate: WeightT
-  private let rateComparator: RateComparator
-  
-  public init(defaultRate: WeightT, rateComparator: @escaping RateComparator) {
-    self.defaultRate = defaultRate
-    self.rateComparator = rateComparator
-  }
-  
-  private lazy var rate: SquareMatrix<WeightT> = {
-    return SquareMatrix<WeightT>(defValue: self.defaultRate)
+  private lazy var rate: SquareMatrix<Double> = {
+    return SquareMatrix<Double>(defValue: 0)
   }()
   private let next = SquareMatrix<Index?>(defValue: nil)
   
   //TODO test
-  public func updateRatesTable(currenciesCount: Int, elements: [(source: Index, destination: Index, weight: WeightT)]) {
+  public func updateRatesTable(currenciesCount: Int, elements: [(source: Index, destination: Index, weight: Double)]) {
     
     rate.reallocate(newEdgeSize: currenciesCount)
     next.reallocate(newEdgeSize: currenciesCount)
@@ -43,8 +35,9 @@ public final class ExchangeRateCalculator<Index: IndexType, WeightT: Monoid> {
     for k in 0..<currenciesCount {
       for i in 0..<currenciesCount {
         for j in 0..<currenciesCount {
-          if rateComparator(rate[(i, j)], rate[(i, k)].mappend(rate[(k, j)])) {
-            rate[(i, j)] = rate[(i, k)].mappend(rate[(k, j)])
+          let newRate = rate[(i, k)] * rate[(k, j)]
+          if rate[(i, j)] < newRate {
+            rate[(i, j)] = newRate
             next[(i, j)] = next[(i, k)]
           }
         }
@@ -61,8 +54,17 @@ public final class ExchangeRateCalculator<Index: IndexType, WeightT: Monoid> {
     var result = [currentSource]
     while currentSource != destination {
       //TODO fix force unwrapp
-      currentSource = next[(currentSource.index, destination.index)]!
+      let newCurrentSource = next[(currentSource.index, destination.index)]!
+      if newCurrentSource == currentSource {
+        assert(false)//TODO log error here
+        return []
+      }
+      currentSource = newCurrentSource
       result.append(currentSource)
+      
+      if result.count > 100 {
+        return result
+      }
     }
     return result
   }
