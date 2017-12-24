@@ -75,7 +75,26 @@ public final class RatesTable {
     exchangeInfoByPair[pair] = newValue
   }
   
+  public func disableEdge(for rateInfo: RateInfo) -> FullExchangeInfo? {
+    
+    let pair = rateInfo.toPair
+    
+    guard var info = exchangeInfoByPair[pair] else {
+      return nil
+    }
+    
+    let oldInfo = info
+    info.exchangeInfo.weight = 0
+    exchangeInfoByPair[pair] = info
+    return oldInfo
+  }
+  
+  public func enableEdge(for rateInfo: RateInfo, fullInfo: FullExchangeInfo) {
+    exchangeInfoByPair[rateInfo.toPair] = fullInfo
+  }
+  
   //TODO test
+  //TODO fix code duplications
   private func updateExchangesPairs(with rateInfo: RateInfo, currency: Currency) {
     
     var allExchanges = allExchangesByCurrency[currency] ?? Set()
@@ -166,4 +185,26 @@ public final class RatesTable {
     
     return result
   }
+}
+
+extension RateInfo {
+  
+  fileprivate var toPair: Pair {
+    let source = Vertex(currency: self.source, exchange: exchange)
+    let destination = Vertex(currency: self.destination, exchange: exchange)
+    
+    return Pair(source: source, destination: destination)
+  }
+  
+  public func reversed() -> RateInfo {
+    
+    return RateInfo(
+      source: destination,
+      destination: source,
+      exchange: exchange,
+      weight: backwardWeight,
+      backwardWeight: weight,
+      date: date)
+  }
+  
 }

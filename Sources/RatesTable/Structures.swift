@@ -52,7 +52,7 @@ public struct RateInfo {
   public let exchange: Exchange
   public let weight: Double
   public let backwardWeight: Double
-  public let date: Date
+  let date: Date
   
   public init(source: Currency, destination: Currency, exchange: Exchange, weight: Double, backwardWeight: Double, date: Date) {
     self.source = source
@@ -109,12 +109,12 @@ extension Pair: Hashable {
 }
 
 struct ExchangeInfo {
-  let weight: Double
+  internal(set) var weight: Double
   let date: Date
 }
 
 public struct FullExchangeInfo {
-  let exchangeInfo: ExchangeInfo
+  internal(set) var exchangeInfo: ExchangeInfo
   let source: VertexIndex
   let destination: VertexIndex
 }

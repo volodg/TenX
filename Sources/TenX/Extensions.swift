@@ -22,17 +22,6 @@ extension RateInfo {
       date: date)
   }
   
-  private func reversed() -> RateInfo {
-    
-    return RateInfo(
-      source: destination,
-      destination: source,
-      exchange: exchange,
-      weight: backwardWeight,
-      backwardWeight: weight,
-      date: date)
-  }
-  
   private func isValidWeight(
     ratesTable: RatesTable,
     exchangeRateCalculator: ExchangeRateCalculator<VertexIndex>,
@@ -49,8 +38,16 @@ extension RateInfo {
       return true
     }
     
+    //do not check current edge
+    let oldInfo = ratesTable.disableEdge(for: self)
+    
     let vertexIndexes = exchangeRateCalculator
       .bestRatesPath(source: source, destination: destination)
+    
+    //enable current pair
+    if let oldInfo = oldInfo {
+      ratesTable.enableEdge(for: self, fullInfo: oldInfo)
+    }
     
     guard let rate = ratesTable.getRate(for: vertexIndexes) else {
       return true
