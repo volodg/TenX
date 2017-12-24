@@ -33,6 +33,12 @@ extension Int64: WithDefaultValue {
   }
 }
 
+extension Double: WithDefaultValue {
+  static var defaultValue: Double {
+    return 0.0
+  }
+}
+
 extension Bool: WithDefaultValue {
   static var defaultValue: Bool {
     return false

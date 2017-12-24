@@ -23,6 +23,17 @@ extension Array where Element: WithDefaultValue {
   }
 }
 
+func createBestRates(vertexes: [Vertex]) {
+  
+  for vertex in vertexes {
+    //storeCurrencyIndex(for: vertex.pair.source)
+    //storeCurrencyIndex(for: vertex.pair.destination)
+  }
+  
+  rate = [Double].createSquareMatrix(size: vertexes.count, defValue: .infinity)
+  next = [Int?].createSquareMatrix(size: vertexes.count, defValue: nil)
+}
+
 //procedure BestRates()
 //for each edge (u,v)
 //  rate[u][v] ← w(u,v)  // the weight of the edge (u,v)
