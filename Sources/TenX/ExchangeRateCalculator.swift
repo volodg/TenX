@@ -5,6 +5,8 @@
 //  Created by Volodymyr  Gorbenko on 24/12/17.
 //
 
+import SquareMatrix
+
 protocol IndexType: Equatable {
   var index: Int { get }
 }
@@ -50,6 +52,7 @@ final class ExchangeRateCalculator<Index: IndexType> {
     var currentSource = source
     var result = [currentSource]
     while currentSource != destination {
+      //TODO fix force unwrapp
       currentSource = next[(currentSource.index, destination.index)]!
       result.append(currentSource)
     }

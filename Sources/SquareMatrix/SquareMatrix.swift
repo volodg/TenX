@@ -5,17 +5,17 @@
 //  Created by Volodymyr  Gorbenko on 24/12/17.
 //
 
-final class SquareMatrix<Element> {
+public final class SquareMatrix<Element> {
   //use one dimension array to reduce anount of allocations
   private var values = [Element]()
   private var edgeSize = 0
   private let defValue: Element
   
-  init(defValue: Element) {
+  public init(defValue: Element) {
     self.defValue = defValue
   }
   
-  subscript(index: (x: Int, y: Int)) -> Element {
+  public subscript(index: (x: Int, y: Int)) -> Element {
     set {
       values[index.y * edgeSize + index.x] = newValue
     }
@@ -32,7 +32,7 @@ final class SquareMatrix<Element> {
   }
   
   //TODO test
-  func reallocate(newEdgeSize: Int, reinit: Bool = true) {
+  public func reallocate(newEdgeSize: Int, reinit: Bool = true) {
     
     func reinitIfNeeded() {
       if reinit {
