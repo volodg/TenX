@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Commons
 
 public struct Currency {
   let rawValue: String
@@ -45,15 +46,15 @@ extension Exchange: Hashable {
   }
 }
 
-public struct RateInfo {
+public struct RateInfo<WeightT: Monoid> {
   let source: Currency
   let destination: Currency
   let exchange: Exchange
-  let weight: Double
-  let backwardWeight: Double
+  let weight: WeightT
+  let backwardWeight: WeightT
   let date: Date
   
-  public init(source: Currency, destination: Currency, exchange: Exchange, weight: Double, backwardWeight: Double, date: Date) {
+  public init(source: Currency, destination: Currency, exchange: Exchange, weight: WeightT, backwardWeight: WeightT, date: Date) {
     self.source = source
     self.destination = destination
     self.exchange = exchange
@@ -103,13 +104,13 @@ extension Pair: Hashable {
   }
 }
 
-struct ExchangeInfo {
-  let weight: Double
+struct ExchangeInfo<WeightT: Monoid> {
+  let weight: WeightT
   let date: Date
 }
 
-public struct FullExchangeInfo {
-  let exchangeInfo: ExchangeInfo
+public struct FullExchangeInfo<WeightT: Monoid> {
+  let exchangeInfo: ExchangeInfo<WeightT>
   let source: VertexIndex
   let destination: VertexIndex
 }

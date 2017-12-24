@@ -1,26 +1,36 @@
 //
 //  ExchangeRateCalculator.swift
-//  Parser
+//  ExchangeRateCalculator
 //
 //  Created by Volodymyr  Gorbenko on 24/12/17.
 //
 
 import SquareMatrix
+import Commons
 
 public protocol IndexType: Equatable {
   var index: Int { get }
 }
 
-public final class ExchangeRateCalculator<Index: IndexType> {
+public final class ExchangeRateCalculator<Index: IndexType, WeightT: Monoid> {
   
-  public init() {}
+  public typealias RateComparator = (_ lhs: WeightT, _ rhs: WeightT) -> Bool
   
-  //TODO use Decimal type instead of Double
-  private let rate = SquareMatrix<Double>(defValue: .infinity)
+  private let defaultRate: WeightT
+  private let rateComparator: RateComparator
+  
+  public init(defaultRate: WeightT, rateComparator: @escaping RateComparator) {
+    self.defaultRate = defaultRate
+    self.rateComparator = rateComparator
+  }
+  
+  private lazy var rate: SquareMatrix<WeightT> = {
+    return SquareMatrix<WeightT>(defValue: self.defaultRate)
+  }()
   private let next = SquareMatrix<Index?>(defValue: nil)
   
   //TODO test
-  public func updateRatesTable(currenciesCount: Int, elements: [(source: Index, destination: Index, weight: Double)]) {
+  public func updateRatesTable(currenciesCount: Int, elements: [(source: Index, destination: Index, weight: WeightT)]) {
     
     rate.reallocate(newEdgeSize: currenciesCount)
     next.reallocate(newEdgeSize: currenciesCount)
@@ -33,8 +43,8 @@ public final class ExchangeRateCalculator<Index: IndexType> {
     for k in 0..<currenciesCount {
       for i in 0..<currenciesCount {
         for j in 0..<currenciesCount {
-          if rate[(i, j)] > rate[(i, k)] + rate[(k, j)] {
-            rate[(i, j)] = rate[(i, k)] + rate[(k, j)]
+          if rateComparator(rate[(i, j)], rate[(i, k)].mappend(rate[(k, j)])) {
+            rate[(i, j)] = rate[(i, k)].mappend(rate[(k, j)])
             next[(i, j)] = next[(i, k)]
           }
         }

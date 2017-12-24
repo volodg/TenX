@@ -6,6 +6,7 @@
 //
 
 import Parser
+import Commons
 import Foundation
 import RatesTable
 import ExchangeRateCalculator
@@ -20,7 +21,21 @@ import ExchangeRateCalculator
 
 extension VertexIndex: IndexType {}
 
-extension RateInfo {
+//TODO use Decimal type instead of Double
+typealias RateType = Double
+typealias RateMonoidType = SumNum<RateType>
+
+private let defaultRate = RateMonoidType.Sum(.infinity)
+
+//have to write free function because swift does not allow me to extend `SumNum` enum with protocol
+private func rateComparator(_ lhs: RateMonoidType, _ rhs: RateMonoidType) -> Bool {
+  switch  (lhs, rhs) {
+  case (.Sum(let v), .Sum(let v2)):
+    return v > v2
+  }
+}
+
+extension RateInfo where WeightT == RateMonoidType {
   
   init(source: String, destination: String, exchange: String, weight: Double, backwardWeight: Double, date: Date) {
     
@@ -28,14 +43,14 @@ extension RateInfo {
       source: Currency(rawValue: source),
       destination: Currency(rawValue: destination),
       exchange: Exchange(rawValue: exchange),
-      weight: weight,
-      backwardWeight: backwardWeight,
+      weight: .Sum(weight),
+      backwardWeight: .Sum(backwardWeight),
       date: date)
   }
 }
 
-let testVertexes: [RateInfo] = [
-  RateInfo(source: "1", destination: "2", exchange: "KRAKEN", weight: 1  , backwardWeight: 1  , date: Date()),
+let testVertexes: [RateInfo<RateMonoidType>] = [
+  RateInfo(source: "1", destination: "2", exchange: "KRAKEN", weight: 1  , backwardWeight: 1.0, date: Date()),
   RateInfo(source: "1", destination: "3", exchange: "KRAKEN", weight: 1  , backwardWeight: 1  , date: Date()),
   RateInfo(source: "2", destination: "3", exchange: "KRAKEN", weight: 0.5, backwardWeight: 0.5, date: Date()),
   RateInfo(source: "2", destination: "4", exchange: "KRAKEN", weight: 1  , backwardWeight: 1  , date: Date()),
@@ -63,13 +78,15 @@ let testVertexes: [RateInfo] = [
 //  RateInfo(pair: Pair(source: "7", destination: "5"), weight: 1),
 ]
 
-let ratesTable = RatesTable()
+let ratesTable = RatesTable<RateMonoidType>()
 
 testVertexes.forEach { rateInfo in
   ratesTable.update(rateInfo: rateInfo)
 }
 
-let exchangeRateCalculator = ExchangeRateCalculator<VertexIndex>()
+let exchangeRateCalculator = ExchangeRateCalculator<VertexIndex,RateMonoidType>(
+  defaultRate: defaultRate,
+  rateComparator: rateComparator)
 
 exchangeRateCalculator.updateRatesTable(
   currenciesCount: ratesTable.currenciesCount,
