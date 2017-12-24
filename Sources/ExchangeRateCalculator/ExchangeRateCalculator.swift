@@ -7,11 +7,13 @@
 
 import SquareMatrix
 
-protocol IndexType: Equatable {
+public protocol IndexType: Equatable {
   var index: Int { get }
 }
 
-final class ExchangeRateCalculator<Index: IndexType> {
+public final class ExchangeRateCalculator<Index: IndexType> {
+  
+  public init() {}
   
   //TODO use Decimal type instead of Double
   private let rate = SquareMatrix<Double>(defValue: .infinity)
@@ -19,9 +21,7 @@ final class ExchangeRateCalculator<Index: IndexType> {
   
   //TODO make it template to remove dependence on type
   //TODO test
-  func updateBestRatesTable(elements: [(source: Index, destination: Index, weight: Double)]) {
-    
-    let currenciesCount = exchangesVertex.currenciesCount
+  public func updateRatesTable(currenciesCount: Int, elements: [(source: Index, destination: Index, weight: Double)]) {
     
     rate.reallocate(newEdgeSize: currenciesCount)
     next.reallocate(newEdgeSize: currenciesCount)
@@ -45,7 +45,8 @@ final class ExchangeRateCalculator<Index: IndexType> {
   
   //TODO make it template to remove dependence on type
   //TODO test
-  func bestPath(source: Index, destination: Index) -> [Index] {
+  //TODO rename
+  public func bestPath(source: Index, destination: Index) -> [Index] {
     if next[(source.index, destination.index)] == nil {
       return []
     }

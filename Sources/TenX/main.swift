@@ -7,6 +7,8 @@
 
 import Parser
 import Foundation
+import SquareMatrix
+import ExchangeRateCalculator
 
 //TODO validate SOURCE != DESTINATION
 //TODO store exchanger
@@ -15,6 +17,13 @@ import Foundation
 //2. + to *,
 //3. > to <,
 //3. 0 to 1,
+
+extension VertexIndex: IndexType {
+  static func ==(lhs: VertexIndex, rhs: VertexIndex) -> Bool {
+    return lhs.vertex == rhs.vertex
+      && lhs.index == rhs.index
+  }
+}
 
 extension RateInfo {
   
@@ -67,7 +76,9 @@ testVertexes.forEach { rateInfo in
 
 let exchangeRateCalculator = ExchangeRateCalculator<VertexIndex>()
 
-exchangeRateCalculator.updateBestRatesTable(elements: exchangesVertex.allEdges)
+exchangeRateCalculator.updateRatesTable(
+  currenciesCount: exchangesVertex.currenciesCount,
+  elements: exchangesVertex.allEdges)
 
 func processBestPath() {
   

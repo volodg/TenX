@@ -106,14 +106,7 @@ extension VertexIndex: Hashable {
   }
 }
 
-extension VertexIndex: IndexType {
-  static func ==(lhs: VertexIndex, rhs: VertexIndex) -> Bool {
-    return lhs.vertex == rhs.vertex
-      && lhs.index == rhs.index
-  }
-}
-
-class ExchangesVertex {
+final class ExchangesVertex {
   
   private var allExchangesByCurrency = [Currency:Set<Exchange>]()
   private var exchangeInfoByPair = [Pair:FullExchangeInfo]()
