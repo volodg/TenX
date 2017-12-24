@@ -56,20 +56,24 @@ struct ExchangeInfo {
   let date: Date
 }
 
+struct FullExchangeInfo {
+  let pair: Pair//do we need it?
+  let exchangeInfo: ExchangeInfo
+  let sourceIndex: Int
+  let destinationIndex: Int
+}
+
 class ExchangesVertex {
   
-  struct ExchangeInfoWithIndexes {
-    let pair: Pair//do we need it?
-    let exchangeInfo: ExchangeInfo
-    let sourceIndex: Int
-    let destinationIndex: Int
-  }
+  /*private */var exchangeInfoByPair = [Pair:FullExchangeInfo]()
   
-  /*private */var exchangeInfoByPair = [Pair:ExchangeInfoWithIndexes]()
+  var currenciesCount: Int {
+    return currentIndex
+  }
   
   private var currentIndex = 0
   private var currencyToIndexDict = [Currency:Int]()
-  private var indexToCurrencyDict = [Int:Currency]()
+  //private var indexToCurrencyDict = [Int:Currency]()
   
   private func index(for currency: Currency) -> Int {
     if let result = currencyToIndexDict[currency] {
@@ -77,44 +81,28 @@ class ExchangesVertex {
     }
     
     currencyToIndexDict[currency] = currentIndex
-    indexToCurrencyDict[currentIndex] = currency
+    //indexToCurrencyDict[currentIndex] = currency
     let result = currentIndex
     currentIndex += 1
     return result
   }
   
-  private func fillIndexes(vertexes: [Vertex]) {
-    
-    func storeCurrencyIndex(for currency: Currency) {
-      if currencyToIndexDict[currency] == nil {
-        currencyToIndexDict[currency] = currentIndex
-        indexToCurrencyDict[currentIndex] = currency
-        currentIndex += 1
-      }
-    }
-    
-    for vertex in vertexes {
-      storeCurrencyIndex(for: vertex.pair.source)
-      storeCurrencyIndex(for: vertex.pair.destination)
-    }
-  }
-  
-  func enumerate(_ f: ((x: Int, y: Int), _ weight: Double) -> Void) {
-    
+  func forEach(_ body: (FullExchangeInfo) -> Void) {
+    exchangeInfoByPair.forEach { body($0.value) }
   }
   
   func update(pair: Pair, exchangeInfo: ExchangeInfo) {
     
     if let oldExchangeInfo = exchangeInfoByPair[pair],
       exchangeInfo.date < oldExchangeInfo.exchangeInfo.date {
-      //WARN log here
+      //WARN log old date here
       return
     }
     
-    let sourceIndex = 0
-    let destinationIndex = 0
+    let sourceIndex = index(for: pair.source)
+    let destinationIndex = index(for: pair.destination)
     
-    let newValue = ExchangeInfoWithIndexes(
+    let newValue = FullExchangeInfo(
       pair: pair,
       exchangeInfo: exchangeInfo,
       sourceIndex: sourceIndex,
