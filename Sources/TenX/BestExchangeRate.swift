@@ -12,8 +12,15 @@
 var rate = [[Double]]()
 var next = [[Int?]]()
 
-func createRates(size: Int) -> [[Double]] {
-  return []
+extension Array where Element: WithDefaultValue {
+  
+  static func createSquareMatrix(size: Int, defValue: Element) -> [[Element]] {
+    var result = [[Element]](repeating: [], count: size)
+    for i in 0..<size {
+      result[i] = [Element](repeating: Element.defaultValue, count: size)
+    }
+    return result
+  }
 }
 
 //procedure BestRates()
