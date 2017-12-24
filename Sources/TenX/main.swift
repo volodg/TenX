@@ -11,8 +11,8 @@ import Foundation
 import RatesTable
 import ExchangeRateCalculator
 
-//TODO validate SOURCE != DESTINATION
-//TODO store exchanger
+//TODO validate input SOURCE != DESTINATION
+
 //TODO change math:
 //1. infinity to zero,
 //2. + to *,
@@ -32,20 +32,6 @@ private func rateComparator(_ lhs: RateMonoidType, _ rhs: RateMonoidType) -> Boo
   switch  (lhs, rhs) {
   case (.Sum(let v), .Sum(let v2)):
     return v > v2
-  }
-}
-
-extension RateInfo where WeightT == RateMonoidType {
-  
-  init(source: String, destination: String, exchange: String, weight: Double, backwardWeight: Double, date: Date) {
-    
-    self.init(
-      source: Currency(rawValue: source),
-      destination: Currency(rawValue: destination),
-      exchange: Exchange(rawValue: exchange),
-      weight: .Sum(weight),
-      backwardWeight: .Sum(backwardWeight),
-      date: date)
   }
 }
 
