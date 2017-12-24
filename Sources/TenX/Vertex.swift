@@ -49,13 +49,15 @@ let allVertexes: [Vertex] = [
 ]
 
 var currentIndex = 0
-var currencyToIndexDict = Dictionary<Currency,(Int, Currency)>()
+var currencyToIndexDict = Dictionary<Currency,Int>()
+var indexToCurrencyDict = Dictionary<Int,Currency>()
 
 func fillIndexes(vertexes: [Vertex]) {
   
   func storeCurrencyIndex(for currency: Currency) {
     if currencyToIndexDict[currency] == nil {
-      currencyToIndexDict[currency] = (currentIndex, currency)
+      currencyToIndexDict[currency] = currentIndex
+      indexToCurrencyDict[currentIndex] = currency
       currentIndex += 1
     }
   }
