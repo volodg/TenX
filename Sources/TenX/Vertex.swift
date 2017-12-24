@@ -15,7 +15,8 @@ struct RateInfo {
   let destination: Currency
   let exchange: Exchange
   let weight: Double
-  let reverseWeight: Double
+  let backwardWeight: Double
+  let date: Date
 }
 
 struct Vertex {
@@ -147,19 +148,21 @@ class ExchangesVertex {
   //TODO test
   func update(rateInfo: RateInfo) {
     
+    //update pair
     let source = Vertex(currency: rateInfo.source, exchange: rateInfo.exchange)
     let destination = Vertex(currency: rateInfo.destination, exchange: rateInfo.exchange)
     
-    let pair1 = Pair(source: source, destination: destination)
-    let exchangeInfo1 = ExchangeInfo(weight: rateInfo.weight, date: Date())
+    let pair = Pair(source: source, destination: destination)
+    let exchangeInfo = ExchangeInfo(weight: rateInfo.weight, date: rateInfo.date)
     
-    update(pair: pair1, exchangeInfo: exchangeInfo1)
+    update(pair: pair, exchangeInfo: exchangeInfo)
     
-    let pair2 = Pair(source: destination, destination: source)
-    let exchangeInfo2 = ExchangeInfo(weight: rateInfo.reverseWeight, date: Date())
+    //update backward pair
+    let backwardPair = Pair(source: destination, destination: source)
+    let backwardExchangeInfo = ExchangeInfo(weight: rateInfo.backwardWeight, date: rateInfo.date)
     
-    update(pair: pair2, exchangeInfo: exchangeInfo2)
+    update(pair: backwardPair, exchangeInfo: backwardExchangeInfo)
     
-    //TODO add 1 to 1 edges
+    //update cross echangers pairs
   }
 }
