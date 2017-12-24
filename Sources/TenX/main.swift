@@ -10,50 +10,47 @@ import Foundation
 
 //TODO validate SOURCE != DESTINATION
 //TODO store exchanger
-
-struct RateInfo {
-  let pair: Pair
-  let weight: Double
-}
+//TODO change math:
+//1. infinity to zero,
+//2. + to *,
+//2. > to <,
 
 let testVertexes: [RateInfo] = [
-  RateInfo(pair: Pair(source: "1", destination: "2"), weight: 1),
-  RateInfo(pair: Pair(source: "1", destination: "3"), weight: 1),
-  RateInfo(pair: Pair(source: "2", destination: "3"), weight: 0.5),
-  RateInfo(pair: Pair(source: "3", destination: "2"), weight: 0.5),
-  RateInfo(pair: Pair(source: "2", destination: "4"), weight: 1),
-  RateInfo(pair: Pair(source: "3", destination: "4"), weight: 1),
-  RateInfo(pair: Pair(source: "3", destination: "6"), weight: 2),
-  RateInfo(pair: Pair(source: "4", destination: "6"), weight: 2),
-  RateInfo(pair: Pair(source: "3", destination: "5"), weight: 2),
-  RateInfo(pair: Pair(source: "4", destination: "5"), weight: 2),
-  RateInfo(pair: Pair(source: "6", destination: "5"), weight: 0.5),
-  RateInfo(pair: Pair(source: "5", destination: "6"), weight: 0.5),
-  RateInfo(pair: Pair(source: "6", destination: "7"), weight: 2),
-  RateInfo(pair: Pair(source: "5", destination: "7"), weight: 0.5),
+  RateInfo(source: "1", destination: "2", exchange: "KRAKEN", weight: 1  , reverseWeight: 1),
+  RateInfo(source: "1", destination: "3", exchange: "KRAKEN", weight: 1  , reverseWeight: 1),
+  RateInfo(source: "2", destination: "3", exchange: "KRAKEN", weight: 0.5, reverseWeight: 0.5),
+  RateInfo(source: "2", destination: "4", exchange: "KRAKEN", weight: 1  , reverseWeight: 1),
+  RateInfo(source: "3", destination: "4", exchange: "KRAKEN", weight: 1  , reverseWeight: 1),
+  RateInfo(source: "3", destination: "6", exchange: "KRAKEN", weight: 2  , reverseWeight: 2),
+  RateInfo(source: "4", destination: "6", exchange: "KRAKEN", weight: 2  , reverseWeight: 2),
+  RateInfo(source: "3", destination: "5", exchange: "KRAKEN", weight: 2  , reverseWeight: 2),
+  RateInfo(source: "4", destination: "5", exchange: "KRAKEN", weight: 2  , reverseWeight: 2),
+  RateInfo(source: "5", destination: "6", exchange: "KRAKEN", weight: 0.5, reverseWeight: 0.5),
+  RateInfo(source: "6", destination: "7", exchange: "KRAKEN", weight: 2  , reverseWeight: 2),
+  RateInfo(source: "5", destination: "7", exchange: "KRAKEN", weight: 0.5, reverseWeight: 0.5),
   //  RateInfo(pair: Pair(source: "7", destination: "5"), weight: 1),
 ]
 
 let exchangesVertex = ExchangesVertex()
 
-testVertexes.forEach { vertex in
-  
-  let exchangeInfo = ExchangeInfo(exchanger: "some exchanger", weight: vertex.weight, date: Date())
-  exchangesVertex.update(pair: vertex.pair, exchangeInfo: exchangeInfo)
+testVertexes.forEach { rateInfo in
+  exchangesVertex.update(rateInfo: rateInfo)
 }
 
-let exchangeRateCalculator = ExchangeRateCalculator<CurrencyIndex>()
+let exchangeRateCalculator = ExchangeRateCalculator<VertexIndex>()
 
 exchangeRateCalculator.updateBestRatesTable(elements: exchangesVertex.allEdges)
 
 func processBestPath() {
   
-  guard let source = exchangesVertex.getIndex(for: "1") else {
+  let sourceVertex = Vertex(currency: "1", exchange: "KRAKEN")
+  guard let source = exchangesVertex.getIndex(for: sourceVertex) else {
     print("invalid source")
     return
   }
   
-  guard let destination = exchangesVertex.getIndex(for: "7") else {
+  let distanceVertex = Vertex(currency: "7", exchange: "KRAKEN")
+  guard let destination = exchangesVertex.getIndex(for: distanceVertex) else {
     print("invalid destination")
     return
   }

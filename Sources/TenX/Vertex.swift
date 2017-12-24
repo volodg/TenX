@@ -8,10 +8,37 @@
 import Foundation
 
 typealias Currency = String
+typealias Exchange = String
 
-struct Pair {
+struct RateInfo {
   let source: Currency
   let destination: Currency
+  let exchange: Exchange
+  let weight: Double
+  let reverseWeight: Double
+}
+
+struct Vertex {
+  let currency: Currency
+  let exchange: Exchange
+}
+
+extension Vertex: Equatable {
+  static func ==(lhs: Vertex, rhs: Vertex) -> Bool {
+    return lhs.currency == rhs.currency
+      && lhs.exchange == rhs.exchange
+  }
+}
+
+extension Vertex: Hashable {
+  var hashValue: Int {
+    return currency.hashValue ^ exchange.hashValue
+  }
+}
+
+struct Pair {
+  let source: Vertex
+  let destination: Vertex
 }
 
 extension Pair: Equatable {
@@ -28,31 +55,30 @@ extension Pair: Hashable {
 }
 
 struct ExchangeInfo {
-  let exchanger: String
   let weight: Double
   let date: Date
 }
 
 struct FullExchangeInfo {
   let exchangeInfo: ExchangeInfo
-  let source: CurrencyIndex
-  let destination: CurrencyIndex
+  let source: VertexIndex
+  let destination: VertexIndex
 }
 
-struct CurrencyIndex {
-  let currency: Currency
+struct VertexIndex {
+  let vertex: Vertex
   let index: Int
 }
 
-extension CurrencyIndex: Hashable {
+extension VertexIndex: Hashable {
   var hashValue: Int {
-    return currency.hashValue ^ index
+    return vertex.hashValue ^ index
   }
 }
 
-extension CurrencyIndex: IndexType {
-  static func ==(lhs: CurrencyIndex, rhs: CurrencyIndex) -> Bool {
-    return lhs.currency == rhs.currency
+extension VertexIndex: IndexType {
+  static func ==(lhs: VertexIndex, rhs: VertexIndex) -> Bool {
+    return lhs.vertex == rhs.vertex
       && lhs.index == rhs.index
   }
 }
@@ -66,24 +92,24 @@ class ExchangesVertex {
   }
   
   private var currentIndex = 0
-  /*private */var currencyToIndexDict = [Currency:CurrencyIndex]()
+  /*private */var vertexToIndexDict = [Vertex:VertexIndex]()
   //TODO remove this property
-  /*private */var indexToCurrencyDict = [Int:Currency]()
+  /*private */var indexToVertexDict = [Int:Vertex]()
   
   //TODO test
-  func getIndex(for currency: Currency) -> CurrencyIndex? {
-    return currencyToIndexDict[currency]
+  func getIndex(for vertex: Vertex) -> VertexIndex? {
+    return vertexToIndexDict[vertex]
   }
   
   //TODO test
-  private func createOrGetIndex(for currency: Currency) -> CurrencyIndex {
-    if let result = currencyToIndexDict[currency] {
+  private func createOrGetIndex(for vertex: Vertex) -> VertexIndex {
+    if let result = vertexToIndexDict[vertex] {
       return result
     }
     
-    let result = CurrencyIndex(currency: currency, index: currentIndex)
-    currencyToIndexDict[currency] = result
-    indexToCurrencyDict[currentIndex] = currency
+    let result = VertexIndex(vertex: vertex, index: currentIndex)
+    vertexToIndexDict[vertex] = result
+    indexToVertexDict[currentIndex] = vertex
     currentIndex += 1
     return result
   }
@@ -93,7 +119,7 @@ class ExchangesVertex {
     exchangeInfoByPair.forEach { body($0.value) }
   }
   
-  typealias Edge = (source: CurrencyIndex, destination: CurrencyIndex, weight: Double)
+  typealias Edge = (source: VertexIndex, destination: VertexIndex, weight: Double)
   
   var allEdges: [Edge] {
     return exchangeInfoByPair.map { (_, value) -> Edge in
@@ -102,7 +128,7 @@ class ExchangesVertex {
   }
   
   //TODO test
-  func update(pair: Pair, exchangeInfo: ExchangeInfo) {
+  private func update(pair: Pair, exchangeInfo: ExchangeInfo) {
     
     if let oldExchangeInfo = exchangeInfoByPair[pair],
       exchangeInfo.date < oldExchangeInfo.exchangeInfo.date {
@@ -116,5 +142,24 @@ class ExchangesVertex {
       destination: createOrGetIndex(for: pair.destination))
     
     exchangeInfoByPair[pair] = newValue
+  }
+  
+  //TODO test
+  func update(rateInfo: RateInfo) {
+    
+    let source = Vertex(currency: rateInfo.source, exchange: rateInfo.exchange)
+    let destination = Vertex(currency: rateInfo.destination, exchange: rateInfo.exchange)
+    
+    let pair1 = Pair(source: source, destination: destination)
+    let exchangeInfo1 = ExchangeInfo(weight: rateInfo.weight, date: Date())
+    
+    update(pair: pair1, exchangeInfo: exchangeInfo1)
+    
+    let pair2 = Pair(source: destination, destination: source)
+    let exchangeInfo2 = ExchangeInfo(weight: rateInfo.reverseWeight, date: Date())
+    
+    update(pair: pair2, exchangeInfo: exchangeInfo2)
+    
+    //TODO add 1 to 1 edges
   }
 }
