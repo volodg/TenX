@@ -21,4 +21,6 @@ testVertexes.forEach { vertex in
 
 updateBestRatesTable(exchangesVertex: exchangesVertex)
 
-print("Hello World!!!: ")
+let result = bestPath(source: "1", destination: "7")
+
+print("best path: \(result)")

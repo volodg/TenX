@@ -72,8 +72,8 @@ class ExchangesVertex {
   }
   
   private var currentIndex = 0
-  private var currencyToIndexDict = [Currency:Int]()
-  //private var indexToCurrencyDict = [Int:Currency]()
+  /*private */var currencyToIndexDict = [Currency:Int]()
+  /*private */var indexToCurrencyDict = [Int:Currency]()
   
   private func index(for currency: Currency) -> Int {
     if let result = currencyToIndexDict[currency] {
@@ -81,7 +81,7 @@ class ExchangesVertex {
     }
     
     currencyToIndexDict[currency] = currentIndex
-    //indexToCurrencyDict[currentIndex] = currency
+    indexToCurrencyDict[currentIndex] = currency
     let result = currentIndex
     currentIndex += 1
     return result
