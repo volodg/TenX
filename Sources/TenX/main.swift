@@ -16,6 +16,20 @@ import Foundation
 //3. > to <,
 //3. 0 to 1,
 
+extension RateInfo {
+  
+  init(source: String, destination: String, exchange: String, weight: Double, backwardWeight: Double, date: Date) {
+    
+    self.init(
+      source: Currency(rawValue: source),
+      destination: Currency(rawValue: destination),
+      exchange: Exchange(rawValue: exchange),
+      weight: weight,
+      backwardWeight: backwardWeight,
+      date: date)
+  }
+}
+
 let testVertexes: [RateInfo] = [
   RateInfo(source: "1", destination: "2", exchange: "KRAKEN", weight: 1  , backwardWeight: 1  , date: Date()),
   RateInfo(source: "1", destination: "3", exchange: "KRAKEN", weight: 1  , backwardWeight: 1  , date: Date()),
@@ -57,13 +71,13 @@ exchangeRateCalculator.updateBestRatesTable(elements: exchangesVertex.allEdges)
 
 func processBestPath() {
   
-  let sourceVertex = Vertex(currency: "1", exchange: "KRAKEN")
+  let sourceVertex = Vertex(currency: Currency(rawValue: "1"), exchange: Exchange(rawValue: "KRAKEN"))
   guard let source = exchangesVertex.getIndex(for: sourceVertex) else {
     print("invalid source")
     return
   }
   
-  let distanceVertex = Vertex(currency: "7", exchange: "KRAKEN")
+  let distanceVertex = Vertex(currency: Currency(rawValue: "7"), exchange: Exchange(rawValue: "KRAKEN"))
   guard let destination = exchangesVertex.getIndex(for: distanceVertex) else {
     print("invalid destination")
     return

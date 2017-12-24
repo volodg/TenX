@@ -7,8 +7,37 @@
 
 import Foundation
 
-typealias Currency = String
-typealias Exchange = String
+struct Currency {
+  let rawValue: String
+}
+
+extension Currency: Equatable {
+  static func ==(lhs: Currency, rhs: Currency) -> Bool {
+    return lhs.rawValue == rhs.rawValue
+  }
+}
+
+extension Currency: Hashable {
+  var hashValue: Int {
+    return rawValue.hashValue
+  }
+}
+
+struct Exchange {
+  let rawValue: String
+}
+
+extension Exchange: Equatable {
+  static func ==(lhs: Exchange, rhs: Exchange) -> Bool {
+    return lhs.rawValue == rhs.rawValue
+  }
+}
+
+extension Exchange: Hashable {
+  var hashValue: Int {
+    return rawValue.hashValue
+  }
+}
 
 struct RateInfo {
   let source: Currency
