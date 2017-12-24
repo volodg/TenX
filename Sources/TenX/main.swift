@@ -8,7 +8,6 @@
 import Parser
 import Foundation
 
-//TODO check time
 //TODO validate SOURCE != DESTINATION
 //TODO store exchanger
 
@@ -20,9 +19,6 @@ testVertexes.forEach { vertex in
   exchangesVertex.update(pair: vertex.pair, exchangeInfo: exchangeInfo)
 }
 
+updateBestRatesTable(exchangesVertex: exchangesVertex)
 
-for i in 0..<2 {
-  print("size: \(i)")
-}
-
-print("Hello World!!!: \(exchangesVertex.exchangeInfoByPair)")
+print("Hello World!!!: ")

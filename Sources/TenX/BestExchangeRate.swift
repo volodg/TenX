@@ -10,7 +10,7 @@
 //let V[] = an array containing each vertex
 
 var rate = [[Double]]()
-var next = [[FullExchangeInfo?]]()
+var next = [[Currency?]]()
 
 extension Array where Element: WithDefaultValue {
   
@@ -23,10 +23,29 @@ extension Array where Element: WithDefaultValue {
   }
 }
 
-func pudateBestRatesTable(exchangesVertex: ExchangesVertex) {
+//TODO make it template to remove dependence on type
+func updateBestRatesTable(exchangesVertex: ExchangesVertex) {
   
-  rate = [Double].createSquareMatrix(size: exchangesVertex.currenciesCount, defValue: .infinity)
-  next = [FullExchangeInfo?].createSquareMatrix(size: exchangesVertex.currenciesCount, defValue: nil)
+  let currenciesCount = exchangesVertex.currenciesCount
+  
+  rate = [Double].createSquareMatrix(size: currenciesCount, defValue: .infinity)
+  next = [Currency?].createSquareMatrix(size: currenciesCount, defValue: nil)
+  
+  exchangesVertex.forEach { info in
+    rate[info.sourceIndex][info.destinationIndex] = info.exchangeInfo.weight
+    next[info.sourceIndex][info.destinationIndex] = info.pair.destination
+  }
+  
+  for k in 0..<currenciesCount {
+    for i in 0..<currenciesCount {
+      for j in 0..<currenciesCount {
+        if rate[i][j] < rate[i][k] + rate[k][j] {
+          rate[i][j] = rate[i][k] + rate[k][j]
+          next[i][j] = next[i][k]
+        }
+      }
+    }
+  }
 }
 
 //procedure BestRates()

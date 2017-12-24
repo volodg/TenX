@@ -113,4 +113,3 @@ class ExchangesVertex {
 }
 
 let exchangesVertex = ExchangesVertex()
-
