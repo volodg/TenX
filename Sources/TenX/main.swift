@@ -19,8 +19,8 @@ testVertexes.forEach { vertex in
   exchangesVertex.update(pair: vertex.pair, exchangeInfo: exchangeInfo)
 }
 
-updateBestRatesTable(exchangesVertex: exchangesVertex)
+exchangeRateCalculator.updateBestRatesTable(exchangesVertex: exchangesVertex)
 
-let result = bestPath(source: "1", destination: "7")
+let result = exchangeRateCalculator.bestPath(source: "1", destination: "7")
 
 print("best path: \(result)")

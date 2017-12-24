@@ -75,6 +75,7 @@ class ExchangesVertex {
   /*private */var currencyToIndexDict = [Currency:Int]()
   /*private */var indexToCurrencyDict = [Int:Currency]()
   
+  //TODO test
   private func index(for currency: Currency) -> Int {
     if let result = currencyToIndexDict[currency] {
       return result
@@ -87,10 +88,12 @@ class ExchangesVertex {
     return result
   }
   
+  //TODO test
   func forEach(_ body: (FullExchangeInfo) -> Void) {
     exchangeInfoByPair.forEach { body($0.value) }
   }
   
+  //TODO test
   func update(pair: Pair, exchangeInfo: ExchangeInfo) {
     
     if let oldExchangeInfo = exchangeInfoByPair[pair],
