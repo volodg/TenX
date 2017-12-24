@@ -131,4 +131,29 @@ public final class RatesTable {
     
     update(pair: backwardPair, exchangeInfo: backwardExchangeInfo)
   }
+  
+  public func getRate(for path: [VertexIndex]) -> Double? {
+    
+    if path.count < 2 {
+      return nil
+    }
+    
+    var index = 1
+    var result = 0.0//TODO, change to 1
+    
+    while index < path.count {
+      index += 1
+      
+      let pair = Pair(source: path[index - 1].vertex, destination: path[index].vertex)
+      
+      guard let exchangeInfo = exchangeInfoByPair[pair] else {
+        assert(false)
+        continue
+      }
+      
+      result += exchangeInfo.exchangeInfo.weight
+    }
+    
+    return result
+  }
 }

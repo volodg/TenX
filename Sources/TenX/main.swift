@@ -89,11 +89,15 @@ func processBestPath() {
     return
   }
   
-  let result = exchangeRateCalculator
+  let vertexIndexes = exchangeRateCalculator
     .bestRatesPath(source: source, destination: destination)
-    .map { ($0.vertex.currency, $0.vertex.exchange) }
+  
+  let result = vertexIndexes.map { ($0.vertex.currency, $0.vertex.exchange) }
+  
+  let rate = ratesTable.getRate(for: vertexIndexes)
   
   print("best path: \(result)")
+  print("best path: \(rate!)")
 }
 
 processBestPath()
