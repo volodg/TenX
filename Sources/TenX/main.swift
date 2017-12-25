@@ -14,7 +14,7 @@ private let logConfigurations = [
   XcodeLogConfiguration(debugMode: true),
   RotatingLogFileConfiguration(minimumSeverity: .info,
                                daysToKeep: 7,
-                               directoryPath: "./")
+                               directoryPath: "~/TenXLogs/")
 ]
 
 Log.enable(configuration: logConfigurations)
