@@ -6,7 +6,6 @@
 //
 
 import SquareMatrix
-import Commons
 import Result
 
 public protocol IndexType: Equatable {

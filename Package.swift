@@ -52,7 +52,7 @@ let package = Package(
       dependencies: []),
     .testTarget(
       name: "TenXTests",
-      dependencies: ["Parser"]),
+      dependencies: ["TenX"]),
     ]
 )
 

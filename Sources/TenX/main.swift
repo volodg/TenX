@@ -8,9 +8,7 @@
 import Parser
 import CleanroomLogger
 
-//TODO write unit tests
-
-private let appLogic = AppLogic(strategy: .strict)
+private let appLogic = AppLogic(strategy: .unstrict)
 
 private let logConfigurations = [
   XcodeLogConfiguration(debugMode: true),
@@ -23,8 +21,7 @@ Log.enable(configuration: logConfigurations)
 
 private var currentLine: String?
 repeat {
-  //TODO uncomment readLine()
-  currentLine = readTestLine()//readLine()
+  currentLine = readLine()//readTestLine()
   if let line = currentLine {
     let cmd = CommandsParser.parse(line: line)
     switch cmd {

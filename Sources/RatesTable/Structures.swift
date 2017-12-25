@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Commons
 
 public struct Currency {
   public let rawValue: String

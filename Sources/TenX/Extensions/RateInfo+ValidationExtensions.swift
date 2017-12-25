@@ -99,7 +99,7 @@ extension RateInfo {
       return nil
     }
     
-    let result = backwardWeight <= 1/weight
+    let result = weight == 0.0 || backwardWeight <= 1/weight
     if !result {
       return .invalidBackwardWeight(info: self, rate: backwardWeight, maximumRate: 1/weight)
     }

@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Commons
 
 public final class RatesTable {
   
