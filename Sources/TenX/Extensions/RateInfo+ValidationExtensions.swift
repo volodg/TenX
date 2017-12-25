@@ -1,5 +1,5 @@
 //
-//  RateInfo+Extensions.swift
+//  RateInfo+ValidationExtensions.swift
 //  TenX
 //
 //  Created by Volodymyr  Gorbenko on 24/12/17.
@@ -90,6 +90,13 @@ extension RateInfo {
     
     if source == destination {
       return .invalidSourceOrDestination(info: self)
+    }
+    
+    switch appLogic.strategy {
+    case .strict:
+      break
+    case .unstrict:
+      return nil
     }
     
     let result = backwardWeight <= 1/weight
