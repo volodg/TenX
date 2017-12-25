@@ -88,10 +88,16 @@ extension RateInfo {
     return true
   }
   
+  //TODO remove print, use Logger
   func isValid(
     ratesTable: RatesTable,
     exchangeRateCalculator: ExchangeRateCalculator<VertexIndex>
     ) -> Bool {
+    
+    if source == destination {
+      print("Error invalid destination: \(destination), should not be the same as source: \(source)")
+      return false
+    }
     
     let result = backwardWeight <= 1/weight
     if !result {

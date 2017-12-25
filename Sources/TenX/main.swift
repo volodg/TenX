@@ -15,9 +15,9 @@ import ExchangeRateCalculator
 
 extension VertexIndex: IndexType {}
 
-let exchangeRateCalculator = ExchangeRateCalculator<VertexIndex>()
+private let exchangeRateCalculator = ExchangeRateCalculator<VertexIndex>()
 
-let ratesTable = RatesTable()
+private let ratesTable = RatesTable()
 
 testVertexes.forEach { rateInfo in
   
