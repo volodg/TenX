@@ -11,18 +11,16 @@ import CleanroomLogger
 
 private let appLogic = AppLogic(strategy: .unstrict)
 
-private let logsPath = "~/TenXLogs/"
+let logFileConfiguration = RotatingLogFileConfiguration(
+  minimumSeverity: .verbose,
+  daysToKeep: 7,
+  directoryPath: "TenXLogs/")
 
-try? FileManager.default.createDirectory(
-  at: URL(fileURLWithPath: logsPath),
-  withIntermediateDirectories: true,
-  attributes: nil)
+try? logFileConfiguration.createLogDirectory()
 
 private let logConfigurations = [
   XcodeLogConfiguration(debugMode: true),
-  RotatingLogFileConfiguration(minimumSeverity: .info,
-                               daysToKeep: 7,
-                               directoryPath: "~/TenXLogs/")
+  logFileConfiguration
 ]
 
 Log.enable(configuration: logConfigurations)
