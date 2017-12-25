@@ -31,7 +31,8 @@ extension RateInfo {
   private func weightValidationError(
     appLogic: AppLogic,
     exchange: Exchange,
-    reverted: Bool) -> RateInfoValidationError? {
+    reverted: Bool,
+    var stop: inout Bool) -> RateInfoValidationError? {
     
     let rateInfo = appLogic.getRateInfo(
       sourceCurrency: self.destination,
@@ -39,7 +40,12 @@ extension RateInfo {
       destinationCurrency: self.source,
       destinationExchange: exchange)
     
-    guard let rate = rateInfo.value?.rate, rate != 0 else {
+    guard let rate = rateInfo.value?.rate else {
+      return nil
+    }
+    
+    guard rate != 0 else {
+      stop = true
       return nil
     }
     
@@ -51,6 +57,8 @@ extension RateInfo {
         return .invalidWeight(info: self, rate: weight, maximumRate: 1/rate)
       }
     }
+    
+    stop = true
     return nil
   }
   
@@ -71,14 +79,17 @@ extension RateInfo {
     
     var result: RateInfoValidationError? = nil
     
+    var stop = false
+    
     for exchange in allExchanges {
       
       result = checkRateInfo.weightValidationError(
         appLogic: appLogic,
         exchange: exchange,
-        reverted: reverted)
+        reverted: reverted,
+        stop: &stop)
       
-      if result != nil {
+      if result != nil || stop {
         break
       }
     }
