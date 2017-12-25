@@ -9,6 +9,8 @@ import Result
 import RatesTable
 import ExchangeRateCalculator
 
+//To avoid Index to Vertex calculation
+//incapsulate Vertex's info inside of VertexIndex
 extension VertexIndex: IndexType {}
 
 enum CalculateRateStrategies {
@@ -41,7 +43,7 @@ final class AppLogic {
     return ratesTable.getAllExchanges()
   }
   
-  func disableEdge(for rateInfo: RateInfo) -> (FullExchangeInfo, FullExchangeInfo)? {
+  func disableEdge(for rateInfo: RateInfo) -> RatesTable.DisabledEdgeInfo? {
     let result = ratesTable.disableEdge(for: rateInfo)
     exchangeRateCalculator.updateRatesTable(
       currenciesCount: ratesTable.currenciesCount,
@@ -49,8 +51,8 @@ final class AppLogic {
     return result
   }
   
-  func enableEdge(for rateInfo: RateInfo, fullInfo: (FullExchangeInfo, FullExchangeInfo)) {
-    ratesTable.enableEdge(for: rateInfo, fullInfo: fullInfo)
+  func enableEdge(for rateInfo: RateInfo, edgeInfo: RatesTable.DisabledEdgeInfo) {
+    ratesTable.enableEdge(for: rateInfo, edgeInfo: edgeInfo)
     exchangeRateCalculator.updateRatesTable(
       currenciesCount: ratesTable.currenciesCount,
       elements: ratesTable.allEdges)

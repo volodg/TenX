@@ -57,11 +57,11 @@ extension RateInfo {
   private func weightValidationError(appLogic: AppLogic, reverted: Bool) -> RateInfoValidationError? {
     
     //do not check current edge, because it going to be replaced
-    let oldInfo = appLogic.disableEdge(for: self)
+    let oldEdgeInfo = appLogic.disableEdge(for: self)
     defer {
       //enable current edge
-      if let oldInfo = oldInfo {
-        appLogic.enableEdge(for: self, fullInfo: oldInfo)
+      if let oldEdgeInfo = oldEdgeInfo {
+        appLogic.enableEdge(for: self, edgeInfo: oldEdgeInfo)
       }
     }
     

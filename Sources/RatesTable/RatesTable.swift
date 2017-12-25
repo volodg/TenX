@@ -87,7 +87,12 @@ public final class RatesTable {
     exchangeInfoByPair[pair] = fullInfo
   }
   
-  public func disableEdge(for rateInfo: RateInfo) -> (FullExchangeInfo, FullExchangeInfo)? {
+  public struct DisabledEdgeInfo {
+    let rateInfo: FullExchangeInfo
+    let backwardRateInfo: FullExchangeInfo
+  }
+  
+  public func disableEdge(for rateInfo: RateInfo) -> DisabledEdgeInfo? {
     
     let pair = rateInfo.toPair
     guard let left = disableEdge(for: pair) else {
@@ -99,12 +104,12 @@ public final class RatesTable {
       return nil
     }
     
-    return (left, right)
+    return DisabledEdgeInfo(rateInfo: left, backwardRateInfo: right)
   }
   
-  public func enableEdge(for rateInfo: RateInfo, fullInfo: (FullExchangeInfo, FullExchangeInfo)) {
-    exchangeInfoByPair[rateInfo.toPair] = fullInfo.0
-    exchangeInfoByPair[rateInfo.toBackwardPair] = fullInfo.1
+  public func enableEdge(for rateInfo: RateInfo, edgeInfo: DisabledEdgeInfo) {
+    exchangeInfoByPair[rateInfo.toPair] = edgeInfo.rateInfo
+    exchangeInfoByPair[rateInfo.toBackwardPair] = edgeInfo.backwardRateInfo
   }
   
   //TODO fix code duplications

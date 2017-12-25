@@ -8,9 +8,9 @@
 import Parser
 import CleanroomLogger
 
-//TODO implement other stategies
+//TODO write unit tests
 
-private let appLogic = AppLogic(strategy: .unstrict)
+private let appLogic = AppLogic(strategy: .strict)
 
 private let logConfigurations = [
   XcodeLogConfiguration(debugMode: true),
