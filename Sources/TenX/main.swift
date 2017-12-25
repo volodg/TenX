@@ -9,7 +9,7 @@ import Parser
 import Foundation
 import CleanroomLogger
 
-private let appLogic = AppLogic(strategy: .unstrictAllowCycle)
+private let appLogic = AppLogic(strategy: .unstrictIgnoreCycles)
 
 let logFileConfiguration = RotatingLogFileConfiguration(
   minimumSeverity: .verbose,

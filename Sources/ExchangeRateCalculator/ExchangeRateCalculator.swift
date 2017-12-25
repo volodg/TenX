@@ -14,6 +14,7 @@ public protocol IndexType: Equatable {
 
 public enum CalculateRateStrategies {
   //it tries to build path ignoring cycles
+  //but I am not sure this algorithm will give best result
   case unstrictIgnoreCycles
   //This strategy prohibits addition of
   //new vertices that can lead to cycles
