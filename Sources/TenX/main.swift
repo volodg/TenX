@@ -8,10 +8,18 @@
 import Parser
 import Commons
 import RatesTable
+import Parser
 import ExchangeRateCalculator
 
-//TODO use Decimal type instead of Double
-//TODO validate input SOURCE != DESTINATION
+var line: String?
+repeat {
+  line = readTestLine()//readLine()
+  if let line = line {
+    //print("line: \(line)")
+    let cmd = CommandsParser.parse(line: line)
+    print("cmd: \(cmd)")
+  }
+} while line != nil
 
 extension VertexIndex: IndexType {}
 
