@@ -11,7 +11,24 @@ import ExchangeRateCalculator
 
 extension VertexIndex: IndexType {}
 
+enum CalculateRateStrategies {
+  //this strategy forbids adding
+  //new vertices which may lead to grath cycles
+  case strict
+  //in case of path cycles
+  //just returns it, so result will be like
+  //BTC -> ETH -> BTC
+  //it allows user to get profit without echange :-)
+  case unstrict
+}
+
 final class AppLogic {
+  
+  private let strategy: CalculateRateStrategies
+  
+  init(strategy: CalculateRateStrategies) {
+    self.strategy = strategy
+  }
   
   private let exchangeRateCalculator = ExchangeRateCalculator<VertexIndex>()
   private let ratesTable = RatesTable()
@@ -24,7 +41,7 @@ final class AppLogic {
     return ratesTable.getAllExchanges()
   }
   
-  public func disableEdge(for rateInfo: RateInfo) -> (FullExchangeInfo, FullExchangeInfo)? {
+  func disableEdge(for rateInfo: RateInfo) -> (FullExchangeInfo, FullExchangeInfo)? {
     let result = ratesTable.disableEdge(for: rateInfo)
     exchangeRateCalculator.updateRatesTable(
       currenciesCount: ratesTable.currenciesCount,
@@ -57,30 +74,6 @@ final class AppLogic {
     case undefinedSouce
     case undefinedDestination
     case invalidPath(path: [VertexIndex])
-  }
-  
-  func getRateInfo(
-    sourceCurrency: String,
-    sourceExchange: String,
-    destinationCurrency: String,
-    destinationExchange: String) -> Result<PathRateInfo, GetRateError> {
-    
-    return getRateInfo(
-      sourceCurrency: Currency(rawValue: sourceCurrency),
-      sourceExchange: Exchange(rawValue: sourceExchange),
-      destinationCurrency: Currency(rawValue: destinationCurrency),
-      destinationExchange: Exchange(rawValue: destinationExchange))
-  }
-  
-  func getRateInfo(
-    sourceCurrency: Currency,
-    sourceExchange: Exchange,
-    destinationCurrency: Currency,
-    destinationExchange: Exchange) -> Result<PathRateInfo, GetRateError> {
-    
-    let sourceVertex = Vertex(currency: sourceCurrency, exchange: sourceExchange)
-    let destinationVertex = Vertex(currency: destinationCurrency, exchange: destinationExchange)
-    return getRateInfo(pair: Pair(source: sourceVertex, destination: destinationVertex))
   }
   
   struct PathRateInfo {

@@ -28,12 +28,10 @@ public final class RatesTable {
   private var currentIndex = 0
   private var vertexToIndexDict = [Vertex:VertexIndex]()
   
-  //TODO test
   public func getIndex(for vertex: Vertex) -> VertexIndex? {
     return vertexToIndexDict[vertex]
   }
   
-  //TODO test
   private func createOrGetIndex(for vertex: Vertex) -> VertexIndex {
     if let result = vertexToIndexDict[vertex] {
       return result
@@ -45,7 +43,6 @@ public final class RatesTable {
     return result
   }
   
-  //TODO test
   public func forEach(_ body: (FullExchangeInfo) -> Void) {
     exchangeInfoByPair.forEach { body($0.value) }
   }
@@ -58,7 +55,6 @@ public final class RatesTable {
     }
   }
   
-  //TODO test
   private func update(pair: Pair, exchangeInfo: ExchangeInfo) {
     
     if let oldExchangeInfo = exchangeInfoByPair[pair],
@@ -111,7 +107,6 @@ public final class RatesTable {
     exchangeInfoByPair[rateInfo.toBackwardPair] = fullInfo.1
   }
   
-  //TODO test
   //TODO fix code duplications
   private func updateExchangesPairs(with rateInfo: RateInfo, currency: Currency) {
     
@@ -146,14 +141,12 @@ public final class RatesTable {
     allExchangesByCurrency[currency] = allExchanges
   }
   
-  //TODO test
   private func updateExchangesPairs(with rateInfo: RateInfo) {
     
     updateExchangesPairs(with: rateInfo, currency: rateInfo.source)
     updateExchangesPairs(with: rateInfo, currency: rateInfo.destination)
   }
   
-  //TODO test
   //TODO fix code duplication
   public func update(rateInfo: RateInfo) {
     

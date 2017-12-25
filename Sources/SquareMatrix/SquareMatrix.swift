@@ -24,14 +24,12 @@ public final class SquareMatrix<Element> {
     }
   }
   
-  //TODO test
   private func reinit(toIndex: Int) {
     for i in 0..<toIndex {
       values[i] = defValue
     }
   }
   
-  //TODO test
   public func reallocate(newEdgeSize: Int, reinit: Bool = true) {
     
     func reinitIfNeeded() {

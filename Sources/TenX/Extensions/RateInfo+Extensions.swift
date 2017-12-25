@@ -7,7 +7,6 @@
 
 import Foundation
 import RatesTable
-import CleanroomLogger
 import ExchangeRateCalculator
 
 enum RateInfoValidationError: Error {
@@ -25,7 +24,7 @@ extension RateInfo {
       destination: Currency(rawValue: destination),
       exchange: Exchange(rawValue: exchange),
       weight: weight,
-      backwardWeight: backwardWeight,//max(0.0, 1/weight - 0.01),
+      backwardWeight: backwardWeight,
       date: date)
   }
   
