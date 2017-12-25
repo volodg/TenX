@@ -110,7 +110,6 @@ public final class RatesTable {
       let destination = Vertex(currency: currency, exchange: exchange)
       
       let pair = Pair(source: source, destination: destination)
-      //TODO change weight on 1
       let exchangeInfo = ExchangeInfo(weight: 1, date: rateInfo.date)
       
       update(pair: pair, exchangeInfo: exchangeInfo)
@@ -120,7 +119,6 @@ public final class RatesTable {
       let backwardDestination = Vertex(currency: currency, exchange: rateInfo.exchange)
       
       let backwardPair = Pair(source: backwardSource, destination: backwardDestination)
-      //TODO change weight on 1
       let backwardExchangeInfo = ExchangeInfo(weight: 1, date: rateInfo.date)
       
       update(pair: backwardPair, exchangeInfo: backwardExchangeInfo)

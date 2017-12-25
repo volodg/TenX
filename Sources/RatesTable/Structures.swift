@@ -9,7 +9,7 @@ import Foundation
 import Commons
 
 public struct Currency {
-  let rawValue: String
+  public let rawValue: String
   public init(rawValue: String) {
     self.rawValue = rawValue
   }
@@ -28,7 +28,7 @@ extension Currency: Hashable {
 }
 
 public struct Exchange {
-  let rawValue: String
+  public let rawValue: String
   public init(rawValue: String) {
     self.rawValue = rawValue
   }

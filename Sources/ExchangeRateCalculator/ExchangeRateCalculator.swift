@@ -54,17 +54,12 @@ public final class ExchangeRateCalculator<Index: IndexType> {
     var result = [currentSource]
     while currentSource != destination {
       //TODO fix force unwrapp
-      let newCurrentSource = next[(currentSource.index, destination.index)]!
-      if newCurrentSource == currentSource {
-        assert(false)//TODO log error here
+      currentSource = next[(currentSource.index, destination.index)]!
+      if result.contains(currentSource) {
+        assert(false)
         return []
       }
-      currentSource = newCurrentSource
       result.append(currentSource)
-      
-      if result.count > 100 {
-        return result
-      }
     }
     return result
   }

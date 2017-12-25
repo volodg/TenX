@@ -16,9 +16,17 @@ import ExchangeRateCalculator
 
 extension VertexIndex: IndexType {}
 
+//1 - BTC
+//2 - ETH
+//3 - DASH
+//4 - XRP
+//5 - BCH
+//6 - LTC
+//7 - USD
+
 let testVertexes: [RateInfo] = [
-  RateInfo(source: "1", destination: "2", exchange: "KRAKEN", weight: 1.1,  backwardWeight: 0.9, date: Date()),
-  RateInfo(source: "1", destination: "3", exchange: "KRAKEN", weight: 0.5,  backwardWeight: 1  , date: Date()),
+  RateInfo(source: "BTC", destination: "2", exchange: "KRAKEN", weight: 1.1,  backwardWeight: 0.9, date: Date()),
+  RateInfo(source: "BTC", destination: "3", exchange: "KRAKEN", weight: 0.5,  backwardWeight: 1  , date: Date()),
   RateInfo(source: "2", destination: "3", exchange: "KRAKEN", weight: 0.9,  backwardWeight: 1.11, date: Date()),
   RateInfo(source: "2", destination: "3", exchange: "KRAKEN", weight: 0.90,  backwardWeight: 0.33, date: Date()),
   RateInfo(source: "2", destination: "4", exchange: "KRAKEN", weight: 1  ,  backwardWeight: 1  , date: Date()),
@@ -29,11 +37,11 @@ let testVertexes: [RateInfo] = [
   RateInfo(source: "4", destination: "5", exchange: "KRAKEN", weight: 0.45, backwardWeight: 2  , date: Date()),
   RateInfo(source: "4", destination: "6", exchange: "KRAKEN", weight: 0.45, backwardWeight: 2  , date: Date()),
   RateInfo(source: "5", destination: "6", exchange: "KRAKEN", weight: 1.0 , backwardWeight: 0.5, date: Date()),
-  RateInfo(source: "5", destination: "7", exchange: "KRAKEN", weight: 2   , backwardWeight: 0.5, date: Date()),
-  RateInfo(source: "6", destination: "7", exchange: "KRAKEN", weight: 0.5 , backwardWeight: 0.5, date: Date()),
+  RateInfo(source: "5", destination: "USD", exchange: "KRAKEN", weight: 2   , backwardWeight: 0.5, date: Date()),
+  RateInfo(source: "6", destination: "USD", exchange: "KRAKEN", weight: 0.5 , backwardWeight: 0.5, date: Date()),
   
-  RateInfo(source: "1", destination: "2", exchange: "GDAX", weight: 1   , backwardWeight: 0.9, date: Date()),
-  RateInfo(source: "1", destination: "3", exchange: "GDAX", weight: 1   , backwardWeight: 1  , date: Date()),
+  RateInfo(source: "BTC", destination: "2", exchange: "GDAX", weight: 1   , backwardWeight: 0.9, date: Date()),
+  RateInfo(source: "BTC", destination: "3", exchange: "GDAX", weight: 1   , backwardWeight: 1  , date: Date()),
   RateInfo(source: "2", destination: "3", exchange: "GDAX", weight: 0.9 , backwardWeight: 0.5, date: Date()),
   RateInfo(source: "2", destination: "4", exchange: "GDAX", weight: 1   , backwardWeight: 1  , date: Date()),
   RateInfo(source: "3", destination: "4", exchange: "GDAX", weight: 1.1 , backwardWeight: 0.5, date: Date()),
@@ -42,9 +50,8 @@ let testVertexes: [RateInfo] = [
   RateInfo(source: "3", destination: "5", exchange: "GDAX", weight: 0.5 , backwardWeight: 2  , date: Date()),
   RateInfo(source: "4", destination: "5", exchange: "GDAX", weight: 0.45, backwardWeight: 2  , date: Date()),
   RateInfo(source: "5", destination: "6", exchange: "GDAX", weight: 1.0 , backwardWeight: 0.5, date: Date()),
-  RateInfo(source: "6", destination: "7", exchange: "GDAX", weight: 0.6 , backwardWeight: 0.5, date: Date()),//here
-  RateInfo(source: "5", destination: "7", exchange: "GDAX", weight: 2  , backwardWeight: 0.5, date: Date()),
-//  RateInfo(pair: Pair(source: "7", destination: "5"), weight: 1),
+  RateInfo(source: "6", destination: "USD", exchange: "GDAX", weight: 0.6 , backwardWeight: 0.5, date: Date()),//here
+  RateInfo(source: "5", destination: "USD", exchange: "GDAX", weight: 2  , backwardWeight: 0.5, date: Date()),
 ]
 
 let exchangeRateCalculator = ExchangeRateCalculator<VertexIndex>()
@@ -68,13 +75,13 @@ testVertexes.forEach { rateInfo in
 
 func processBestPath() {
   
-  let sourceVertex = Vertex(currency: Currency(rawValue: "1"), exchange: Exchange(rawValue: "KRAKEN"))
+  let sourceVertex = Vertex(currency: Currency(rawValue: "BTC"), exchange: Exchange(rawValue: "KRAKEN"))
   guard let source = ratesTable.getIndex(for: sourceVertex) else {
     print("invalid source")
     return
   }
   
-  let destinationVertex = Vertex(currency: Currency(rawValue: "7"), exchange: Exchange(rawValue: "KRAKEN"))
+  let destinationVertex = Vertex(currency: Currency(rawValue: "USD"), exchange: Exchange(rawValue: "KRAKEN"))
   guard let destination = ratesTable.getIndex(for: destinationVertex) else {
     print("invalid destination")
     return
@@ -84,6 +91,8 @@ func processBestPath() {
     .bestRatesPath(source: source, destination: destination)
   
   let result = vertexIndexes.map { ($0.vertex.currency, $0.vertex.exchange) }
+    .map { "\($0), \($0)" }
+    .joined(separator: "\n")
   
   let rate = ratesTable.getRate(for: vertexIndexes)
   
