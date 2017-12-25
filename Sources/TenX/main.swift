@@ -34,15 +34,23 @@ testVertexes.forEach { rateInfo in
 }
 
 
-func processBestPath() {
+func processBestPath(
+  sourceCurrency: String,
+  sourceExchange: String,
+  destinationCurrency: String,
+  destinationExchange: String) {
   
-  let sourceVertex = Vertex(currency: Currency(rawValue: "BTC"), exchange: Exchange(rawValue: "KRAKEN"))
+  let sourceVertex = Vertex(
+    currency: Currency(rawValue: sourceCurrency),
+    exchange: Exchange(rawValue: sourceExchange))
   guard let source = ratesTable.getIndex(for: sourceVertex) else {
     print("invalid source")
     return
   }
   
-  let destinationVertex = Vertex(currency: Currency(rawValue: "USD"), exchange: Exchange(rawValue: "KRAKEN"))
+  let destinationVertex = Vertex(
+    currency: Currency(rawValue: destinationCurrency),
+    exchange: Exchange(rawValue: destinationExchange))
   guard let destination = ratesTable.getIndex(for: destinationVertex) else {
     print("invalid destination")
     return
@@ -61,5 +69,8 @@ func processBestPath() {
   print("best rate: \(rate!)")
 }
 
-processBestPath()
-
+processBestPath(
+  sourceCurrency: "BTC",
+  sourceExchange: "KRAKEN",
+  destinationCurrency: "USD",
+  destinationExchange: "KRAKEN")
