@@ -1,5 +1,5 @@
 //
-//  AppLogic.swift
+//  CommandsProcessor.swift
 //  TenX
 //
 //  Created by Volodymyr  Gorbenko on 25/12/17.
