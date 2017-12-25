@@ -21,7 +21,7 @@ enum CalculateRateStrategies {
   //just returns it, so result will be like
   //BTC -> ETH -> BTC
   //it allows user to get profit without echange :-)
-  case unstrict
+  case unstrictAllowCycle
 }
 
 final class AppLogic {
@@ -99,7 +99,7 @@ final class AppLogic {
     switch strategy {
     case .strict:
       allowCycle = false
-    case .unstrict:
+    case .unstrictAllowCycle:
       allowCycle = true
     }
     

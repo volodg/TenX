@@ -106,7 +106,7 @@ extension RateInfo {
     switch appLogic.strategy {
     case .strict:
       break
-    case .unstrict:
+    case .unstrictAllowCycle:
       return nil
     }
     
