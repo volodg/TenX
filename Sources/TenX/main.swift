@@ -6,9 +6,17 @@
 //
 
 import Parser
+import Foundation
 import CleanroomLogger
 
 private let appLogic = AppLogic(strategy: .unstrict)
+
+private let logsPath = "~/TenXLogs/"
+
+try? FileManager.default.createDirectory(
+  at: URL(fileURLWithPath: logsPath),
+  withIntermediateDirectories: true,
+  attributes: nil)
 
 private let logConfigurations = [
   XcodeLogConfiguration(debugMode: true),
