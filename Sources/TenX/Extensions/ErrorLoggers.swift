@@ -11,13 +11,15 @@ import CleanroomLogger
 extension AppLogic.GetRateError {
   
   func logError(exchangeRateRequestInfo: ExchangeRateRequestInfo) {
+    guard let error = Log.error else { return }
+    
     switch self {
     case .undefinedSouce:
-      Log.error?.message("invalid source currency: \(exchangeRateRequestInfo.sourceCurrency)")
+      error.message("invalid source currency: \(exchangeRateRequestInfo.sourceCurrency)")
     case .undefinedDestination:
-      Log.error?.message("invalid destination currency: \(exchangeRateRequestInfo.destinationCurrency)")
+      error.message("invalid destination currency: \(exchangeRateRequestInfo.destinationCurrency)")
     case .invalidPath(let path):
-      Log.error?.message("Critical error: invalid rate's path: \(path)")
+      error.message("Critical error: invalid rate's path: \(path)")
     }
   }
 }
@@ -25,9 +27,7 @@ extension AppLogic.GetRateError {
 extension RateInfoValidationError {
   
   func logError() {
-    guard let error = Log.error else {
-      return
-    }
+    guard let error = Log.error else { return }
     
     switch self {
     case .invalidWeight(let info, let rate, let maximumRate):

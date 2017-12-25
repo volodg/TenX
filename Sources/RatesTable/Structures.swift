@@ -86,9 +86,10 @@ extension Vertex: Hashable {
   }
 }
 
+//TODO rename
 public struct Pair {
-  let source: Vertex
-  let destination: Vertex
+  public let source: Vertex
+  public let destination: Vertex
   public init(source: Vertex, destination: Vertex) {
     self.source = source
     self.destination = destination

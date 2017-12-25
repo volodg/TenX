@@ -8,6 +8,8 @@
 import Parser
 import CleanroomLogger
 
+//TODO implement other stategies
+
 private let appLogic = AppLogic()
 
 private let logConfigurations = [
@@ -44,8 +46,7 @@ repeat {
         
         switch result {
         case .success(let info):
-          //TODO process result
-          break
+          print(info.toResultString)
         case .failure(let error):
           error.logError(exchangeRateRequestInfo: exchangeRateRequestInfo)
         }

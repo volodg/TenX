@@ -63,7 +63,7 @@ final class AppLogic {
     sourceCurrency: String,
     sourceExchange: String,
     destinationCurrency: String,
-    destinationExchange: String) -> Result<(rate: Double, path: [Vertex]), GetRateError> {
+    destinationExchange: String) -> Result<PathRateInfo, GetRateError> {
     
     return getRateInfo(
       sourceCurrency: Currency(rawValue: sourceCurrency),
@@ -76,33 +76,37 @@ final class AppLogic {
     sourceCurrency: Currency,
     sourceExchange: Exchange,
     destinationCurrency: Currency,
-    destinationExchange: Exchange) -> Result<(rate: Double, path: [Vertex]), GetRateError> {
+    destinationExchange: Exchange) -> Result<PathRateInfo, GetRateError> {
     
     let sourceVertex = Vertex(currency: sourceCurrency, exchange: sourceExchange)
-    guard let source = ratesTable.getIndex(for: sourceVertex) else {
+    let destinationVertex = Vertex(currency: destinationCurrency, exchange: destinationExchange)
+    return getRateInfo(pair: Pair(source: sourceVertex, destination: destinationVertex))
+  }
+  
+  struct PathRateInfo {
+    let pair: Pair
+    let rate: Double
+    let path: [Vertex]
+  }
+  
+  func getRateInfo(pair: Pair) -> Result<PathRateInfo, GetRateError> {
+    
+    guard let source = ratesTable.getIndex(for: pair.source) else {
       return .failure(.undefinedSouce)
     }
     
-    let destinationVertex = Vertex(currency: destinationCurrency, exchange: destinationExchange)
-    guard let destination = ratesTable.getIndex(for: destinationVertex) else {
+    guard let destination = ratesTable.getIndex(for: pair.destination) else {
       return .failure(.undefinedSouce)
     }
     
     let vertexIndexes = exchangeRateCalculator
       .bestRatesPath(source: source, destination: destination)
     
-    let result = vertexIndexes.map { ($0.vertex.currency, $0.vertex.exchange) }
-      .map { "\($0), \($1)" }
-      .joined(separator: "\n")
-    
-    //TODO remove print
-    print("result: \(result)")
-    
     guard let rate = ratesTable.getRate(for: vertexIndexes) else {
       return .failure(.invalidPath(path: vertexIndexes))
     }
-    print("rate: \(rate)")
     
-    return .success((rate, vertexIndexes.map { $0.vertex }))
+    let path = vertexIndexes.map { $0.vertex }
+    return .success(PathRateInfo(pair: pair, rate: rate, path: path))
   }
 }
