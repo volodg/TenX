@@ -21,9 +21,6 @@ let package = Package(
     .library(
       name: "RatesTable",
       targets: ["RatesTable"]),
-    .library(
-      name: "Commons",
-      targets: ["Commons"]),
     ],
   dependencies: [
     // Dependencies declare other packages that this package depends on.
@@ -39,7 +36,6 @@ let package = Package(
         "Parser",
         "ExchangeRateCalculator",
         "RatesTable",
-        "Commons",
         "CleanroomLogger"
       ]),
     .target(
@@ -50,12 +46,9 @@ let package = Package(
       dependencies: []),
     .target(
       name: "ExchangeRateCalculator",
-      dependencies: ["SquareMatrix", "Commons"]),
+      dependencies: ["SquareMatrix"]),
     .target(
       name: "RatesTable",
-      dependencies: ["Commons"]),
-    .target(
-      name: "Commons",
       dependencies: []),
     .testTarget(
       name: "TenXTests",
