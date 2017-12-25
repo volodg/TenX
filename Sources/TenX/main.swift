@@ -6,6 +6,16 @@
 //
 
 import Parser
+import CleanroomLogger
+
+private let logConfigurations = [
+  XcodeLogConfiguration(debugMode: true),
+  RotatingLogFileConfiguration(minimumSeverity: .info,
+                               daysToKeep: 7,
+                               directoryPath: "./TenXTest.log")
+]
+
+Log.enable(configuration: logConfigurations)
 
 private var currentLine: String?
 repeat {
@@ -25,8 +35,7 @@ repeat {
             destinationExchange: exchangeRateRequestInfo.destinationExchange)
       }
     case .failure(let error):
-      //TODO use logger here
-      print("error: \(error.error)")
+      Log.error?.message("parse command line: \(error.error)")
     }
   }
 } while currentLine != nil

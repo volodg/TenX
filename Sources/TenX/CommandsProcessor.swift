@@ -6,6 +6,7 @@
 //
 
 import RatesTable
+import CleanroomLogger
 import ExchangeRateCalculator
 
 extension VertexIndex: IndexType {}
@@ -37,7 +38,7 @@ func processExchangeRateRequest(
     currency: Currency(rawValue: sourceCurrency),
     exchange: Exchange(rawValue: sourceExchange))
   guard let source = ratesTable.getIndex(for: sourceVertex) else {
-    print("invalid source")
+    Log.error?.message("invalid source currency: \(sourceCurrency)")
     return
   }
   
@@ -45,7 +46,7 @@ func processExchangeRateRequest(
     currency: Currency(rawValue: destinationCurrency),
     exchange: Exchange(rawValue: destinationExchange))
   guard let destination = ratesTable.getIndex(for: destinationVertex) else {
-    print("invalid destination")
+    Log.error?.message("invalid destination currency: \(destinationCurrency)")
     return
   }
   

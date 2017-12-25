@@ -2,12 +2,39 @@
   "object": {
     "pins": [
       {
+        "package": "CleanroomLogger",
+        "repositoryURL": "https://github.com/emaloney/CleanroomLogger.git",
+        "state": {
+          "branch": null,
+          "revision": "fc9959b9c17ddc79fe169c46021c5db1081176c2",
+          "version": "6.0.2"
+        }
+      },
+      {
         "package": "Result",
         "repositoryURL": "https://github.com/antitypical/Result.git",
         "state": {
           "branch": null,
           "revision": "7477584259bfce2560a19e06ad9f71db441fff11",
           "version": "3.2.4"
+        }
+      },
+      {
+        "package": "SwiftyBeaver",
+        "repositoryURL": "https://github.com/SwiftyBeaver/SwiftyBeaver.git",
+        "state": {
+          "branch": null,
+          "revision": "f51c9a69eb97e60f83e95be2ce67b07f7fba17cb",
+          "version": "0.7.0"
+        }
+      },
+      {
+        "package": "XCGLogger",
+        "repositoryURL": "https://github.com/DaveWoodCom/XCGLogger.git",
+        "state": {
+          "branch": null,
+          "revision": "2fd27c92eb102bcf09f3176a230e42e38cacd4a2",
+          "version": "4.0.0"
         }
       }
     ]

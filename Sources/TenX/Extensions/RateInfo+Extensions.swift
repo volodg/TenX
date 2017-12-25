@@ -7,6 +7,7 @@
 
 import Foundation
 import RatesTable
+import CleanroomLogger
 import ExchangeRateCalculator
 
 extension RateInfo {
@@ -54,11 +55,11 @@ extension RateInfo {
     }
     
     let result = weight <= 1/rate
-    if !result {
+    if let error = Log.error, !result {
       let backwardStr = reverted ? "Backward" : ""
       let sourceStr = reverted ? destination : source
       let destinationStr = reverted ? source : destination
-      print("Error: invalid \(backwardStr) weight: \(weight), should be less or equal to \(1/rate) pair: \(sourceStr):\(destinationStr)")
+      error.message("Error: invalid \(backwardStr) weight: \(weight), should be less or equal to \(1/rate) pair: \(sourceStr):\(destinationStr)")
     }
     return result
   }
@@ -88,20 +89,21 @@ extension RateInfo {
     return true
   }
   
-  //TODO remove print, use Logger
   func isValid(
     ratesTable: RatesTable,
     exchangeRateCalculator: ExchangeRateCalculator<VertexIndex>
     ) -> Bool {
     
     if source == destination {
-      print("Error invalid destination: \(destination), should not be the same as source: \(source)")
+      Log.error?
+        .message("Error invalid destination: \(destination), should not be the same as source: \(source)")
       return false
     }
     
     let result = backwardWeight <= 1/weight
     if !result {
-      print("Error invalid backwardWeight: \(backwardWeight), should be less or equal to \(1/weight) pair: \(source):\(destination)")
+      Log.error?
+        .message("Error invalid backwardWeight: \(backwardWeight), should be less or equal to \(1/weight) pair: \(source):\(destination)")
       return false
     }
     
