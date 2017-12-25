@@ -8,6 +8,8 @@
 import Parser
 import CleanroomLogger
 
+private let appLogic = AppLogic()
+
 private let logConfigurations = [
   XcodeLogConfiguration(debugMode: true),
   RotatingLogFileConfiguration(minimumSeverity: .info,
@@ -25,14 +27,28 @@ repeat {
     switch cmd {
     case .success(let cmd):
       switch cmd {
-        case .updateRates(let updateRatesInfo):
-          updateRates(rateInfo: updateRatesInfo.toRateInfo)
-        case .exchangeRateRequest(let exchangeRateRequestInfo):
-          processExchangeRateRequest(
-            sourceCurrency: exchangeRateRequestInfo.sourceCurrency,
-            sourceExchange: exchangeRateRequestInfo.sourceExchange,
-            destinationCurrency: exchangeRateRequestInfo.destinationCurrency,
-            destinationExchange: exchangeRateRequestInfo.destinationExchange)
+      case .updateRates(let updateRatesInfo):
+        let result = appLogic.update(rateInfo: updateRatesInfo.toRateInfo)
+        switch result {
+        case .success:
+          break//do nothing
+        case .failure(let error):
+          error.logError()
+        }
+      case .exchangeRateRequest(let exchangeRateRequestInfo):
+        let result = appLogic.getRateInfo(
+          sourceCurrency: exchangeRateRequestInfo.sourceCurrency,
+          sourceExchange: exchangeRateRequestInfo.sourceExchange,
+          destinationCurrency: exchangeRateRequestInfo.destinationCurrency,
+          destinationExchange: exchangeRateRequestInfo.destinationExchange)
+        
+        switch result {
+        case .success(let info):
+          //TODO process result
+          break
+        case .failure(let error):
+          error.logError(exchangeRateRequestInfo: exchangeRateRequestInfo)
+        }
       }
     case .failure(let error):
       Log.error?.message("parse command line: \(error.error)")

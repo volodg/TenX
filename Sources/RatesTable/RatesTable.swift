@@ -50,10 +50,10 @@ public final class RatesTable {
     exchangeInfoByPair.forEach { body($0.value) }
   }
   
-  public typealias Edge = (source: VertexIndex, destination: VertexIndex, weight: Double)
+  public typealias EdgeWithWeight = (source: VertexIndex, destination: VertexIndex, weight: Double)
   
-  public var allEdges: [Edge] {
-    return exchangeInfoByPair.map { (_, value) -> Edge in
+  public var allEdges: [EdgeWithWeight] {
+    return exchangeInfoByPair.map { (_, value) -> EdgeWithWeight in
       return (value.source, value.destination, value.exchangeInfo.weight)
     }
   }
