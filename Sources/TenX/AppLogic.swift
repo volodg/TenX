@@ -75,7 +75,8 @@ final class AppLogic {
   enum GetRateError: Error {
     case undefinedSouce
     case undefinedDestination
-    case invalidPath(path: [VertexIndex])
+    case invalidBestRatesPath(error: ExchangeRateCalculator<VertexIndex>.BestRatesPathError)
+    case invalidRate(path: [VertexIndex])
   }
   
   struct PathRateInfo {
@@ -105,11 +106,16 @@ final class AppLogic {
     let vertexIndexes = exchangeRateCalculator
       .bestRatesPath(source: source, destination: destination, allowCycle: allowCycle)
     
-    guard let rate = ratesTable.getRate(for: vertexIndexes) else {
-      return .failure(.invalidPath(path: vertexIndexes))
+    switch vertexIndexes {
+    case .success(let vertexIndexes):
+      guard let rate = ratesTable.getRate(for: vertexIndexes) else {
+        return .failure(.invalidRate(path: vertexIndexes))
+      }
+      
+      let path = vertexIndexes.map { $0.vertex }
+      return .success(PathRateInfo(pair: pair, rate: rate, path: path))
+    case .failure(let error):
+      return .failure(.invalidBestRatesPath(error: error))
     }
-    
-    let path = vertexIndexes.map { $0.vertex }
-    return .success(PathRateInfo(pair: pair, rate: rate, path: path))
   }
 }

@@ -112,7 +112,6 @@ public final class RatesTable {
     exchangeInfoByPair[rateInfo.toBackwardPair] = edgeInfo.backwardRateInfo
   }
   
-  //TODO fix code duplications
   private func updateExchangesPairs(with rateInfo: RateInfo, currency: Currency) {
     
     var allExchanges = allExchangesByCurrency[currency] ?? Set()
@@ -126,20 +125,14 @@ public final class RatesTable {
       //update pair
       let source = Vertex(currency: currency, exchange: rateInfo.exchange)
       let destination = Vertex(currency: currency, exchange: exchange)
-      
-      let pair = Pair(source: source, destination: destination)
       let exchangeInfo = ExchangeInfo(weight: 1, date: rateInfo.date)
       
+      let pair = Pair(source: source, destination: destination)
       update(pair: pair, exchangeInfo: exchangeInfo)
       
       //update backward pair
-      let backwardSource = Vertex(currency: currency, exchange: exchange)
-      let backwardDestination = Vertex(currency: currency, exchange: rateInfo.exchange)
-      
-      let backwardPair = Pair(source: backwardSource, destination: backwardDestination)
-      let backwardExchangeInfo = ExchangeInfo(weight: 1, date: rateInfo.date)
-      
-      update(pair: backwardPair, exchangeInfo: backwardExchangeInfo)
+      let backwardPair = Pair(source: destination, destination: source)
+      update(pair: backwardPair, exchangeInfo: exchangeInfo)
     }
     
     allExchanges.insert(rateInfo.exchange)
@@ -152,7 +145,6 @@ public final class RatesTable {
     updateExchangesPairs(with: rateInfo, currency: rateInfo.destination)
   }
   
-  //TODO fix code duplication
   public func update(rateInfo: RateInfo) {
     
     allExchanges.insert(rateInfo.exchange)
@@ -190,6 +182,7 @@ public final class RatesTable {
       index += 1
       
       guard let exchangeInfo = exchangeInfoByPair[pair] else {
+        //TODO return error !!!
         assert(false)
         continue
       }

@@ -7,6 +7,7 @@
 
 import SquareMatrix
 import Commons
+import Result
 
 public protocol IndexType: Equatable {
   var index: Int { get }
@@ -44,25 +45,34 @@ public final class ExchangeRateCalculator<Index: IndexType> {
     }
   }
   
-  public func bestRatesPath(source: Index, destination: Index, allowCycle: Bool) -> [Index] {
+  public enum BestRatesPathError: Error {
+    case noPath(source: Index, destination: Index)
+    case cyclicPath(source: Index, destination: Index)
+  }
+  
+  public func bestRatesPath(source: Index, destination: Index, allowCycle: Bool) -> Result<[Index],BestRatesPathError> {
     if next[(source.index, destination.index)] == nil {
-      return []
+      return .success([])
     }
     var currentSource = source
     var result = [currentSource]
     while currentSource != destination {
-      //TODO fix force unwrapp
-      currentSource = next[(currentSource.index, destination.index)]!
+      let optionalNextSource = next[(currentSource.index, destination.index)]
+      guard let nextSource = optionalNextSource else {
+        assert(false, "algorithm bug, please try to fix")
+        return .failure(.noPath(source: source, destination: destination))
+      }
+      currentSource = nextSource
       if result.contains(currentSource) {
         if allowCycle {
-          return result + [currentSource]
+          return .success(result + [currentSource])
         }
-        assert(false, "critical algorithm bug")
-        return []
+        assert(false, "algorithm bug, please try to fix")
+        return .failure(.cyclicPath(source: source, destination: destination))
       }
       result.append(currentSource)
     }
-    return result
+    return .success(result)
   }
   
 }
