@@ -13,27 +13,26 @@ import ExchangeRateCalculator
 //incapsulate Vertex's info inside of VertexIndex
 extension VertexIndex: IndexType {}
 
-enum CalculateRateStrategies {
-  //this strategy forbids adding
-  //new vertices which may lead to grath cycles
-  case strict
-  //in case of path cycles
-  //just returns it, so result will be like
-  //BTC -> ETH -> BTC
-  //it allows user to get profit without echange :-)
-  case unstrictAllowCycle
-}
-
 final class AppLogic {
   
   let strategy: CalculateRateStrategies
   
-  init(strategy: CalculateRateStrategies) {
-    self.strategy = strategy
+  convenience init(strategy: CalculateRateStrategies) {
+    self.init(strategy: strategy,
+              exchangeRateCalculator: ExchangeRateCalculator<VertexIndex>(),
+              ratesTable: RatesTable())
   }
   
-  private let exchangeRateCalculator = ExchangeRateCalculator<VertexIndex>()
-  private let ratesTable = RatesTable()
+  private init(strategy: CalculateRateStrategies,
+               exchangeRateCalculator: ExchangeRateCalculator<VertexIndex>,
+               ratesTable: RatesTable) {
+    self.strategy = strategy
+    self.exchangeRateCalculator = exchangeRateCalculator
+    self.ratesTable = ratesTable
+  }
+  
+  private let exchangeRateCalculator: ExchangeRateCalculator<VertexIndex>
+  private let ratesTable: RatesTable
   
   func getIndex(for vertex: Vertex) -> VertexIndex? {
     return ratesTable.getIndex(for: vertex)
@@ -43,16 +42,23 @@ final class AppLogic {
     return ratesTable.getAllExchanges()
   }
   
-  func disableEdge(for rateInfo: RateInfo) -> RatesTable.DisabledEdgeInfo? {
-    let result = ratesTable.disableEdge(for: rateInfo)
+  private func disableEdge(for pair: Pair) {
+    _ = ratesTable.disableEdge(for: pair)
+    exchangeRateCalculator.updateRatesTable(
+      currenciesCount: ratesTable.currenciesCount,
+      elements: ratesTable.allEdges)
+  }
+  
+  func disableEdges(for rateInfo: RateInfo) -> RatesTable.DisabledEdgeInfo? {
+    let result = ratesTable.disableEdges(for: rateInfo)
     exchangeRateCalculator.updateRatesTable(
       currenciesCount: ratesTable.currenciesCount,
       elements: ratesTable.allEdges)
     return result
   }
   
-  func enableEdge(for rateInfo: RateInfo, edgeInfo: RatesTable.DisabledEdgeInfo) {
-    ratesTable.enableEdge(for: rateInfo, edgeInfo: edgeInfo)
+  func enableEdges(for rateInfo: RateInfo, edgeInfo: RatesTable.DisabledEdgeInfo) {
+    ratesTable.enableEdges(for: rateInfo, edgeInfo: edgeInfo)
     exchangeRateCalculator.updateRatesTable(
       currenciesCount: ratesTable.currenciesCount,
       elements: ratesTable.allEdges)
@@ -85,7 +91,13 @@ final class AppLogic {
     let path: [Vertex]
   }
   
-  func getRateInfo(pair: Pair) -> Result<PathRateInfo, GetRateError> {
+  private func copy() -> AppLogic {
+    return AppLogic(strategy: strategy,
+                    exchangeRateCalculator: exchangeRateCalculator.copy(),
+                    ratesTable: ratesTable.copy())
+  }
+  
+  private func bestRatesPath(for pair: Pair) -> Result<[VertexIndex],GetRateError> {
     
     guard let source = ratesTable.getIndex(for: pair.source) else {
       return .failure(.undefinedSouce)
@@ -95,27 +107,54 @@ final class AppLogic {
       return .failure(.undefinedSouce)
     }
     
-    let allowCycle: Bool
-    switch strategy {
-    case .strict:
-      allowCycle = false
-    case .unstrictAllowCycle:
-      allowCycle = true
-    }
-    
     let vertexIndexes = exchangeRateCalculator
-      .bestRatesPath(source: source, destination: destination, allowCycle: allowCycle)
+      .bestRatesPath(source: source, destination: destination, strategy: strategy)
     
     switch vertexIndexes {
     case .success(let vertexIndexes):
+      var result = vertexIndexes
+      switch strategy {
+      case .unstrictAllowCycle:
+        break
+      case .strict, .unstrictIgnoreCycles:
+        if let last = vertexIndexes.last, last.vertex != pair.destination {
+          assert(strategy != .strict, "logic error, we have cycles in strict strategy")
+          
+          let newPair = Pair(source: last.vertex, destination: pair.destination)
+          
+          let copy = self.copy()
+          
+          for i in 0..<(vertexIndexes.count - 1) {
+            let pairToDisable = Pair(source: vertexIndexes[i].vertex, destination: vertexIndexes[i + 1].vertex)
+            _ = copy.disableEdge(for: pairToDisable)
+          }
+          let pairToDisable = Pair(source: last.vertex, destination: pair.source)
+          _ = copy.disableEdge(for: pairToDisable)
+          
+          switch copy.bestRatesPath(for: newPair) {
+          case .success(let newValues):
+            result.append(contentsOf: newValues[1...])
+          case .failure(let error):
+            return .failure(error)
+          }
+        }
+      }
+      
+      return .success(result)
+    case .failure(let error):
+      return .failure(.invalidBestRatesPath(error: error))
+    }
+  }
+  
+  func getRateInfo(pair: Pair) -> Result<PathRateInfo, GetRateError> {
+    
+    return bestRatesPath(for: pair).flatMap { vertexIndexes in
       guard let rate = ratesTable.getRate(for: vertexIndexes) else {
         return .failure(.invalidRate(path: vertexIndexes))
       }
       
       let path = vertexIndexes.map { $0.vertex }
       return .success(PathRateInfo(pair: pair, rate: rate, path: path))
-    case .failure(let error):
-      return .failure(.invalidBestRatesPath(error: error))
     }
   }
 }

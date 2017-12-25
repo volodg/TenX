@@ -11,21 +11,29 @@ public final class RatesTable {
   
   public init() {}
   
+  public func copy() -> RatesTable {
+    let result = RatesTable()
+    result.allExchangesByCurrency = allExchangesByCurrency
+    result.allExchanges = allExchanges
+    result.exchangeInfoByPair = exchangeInfoByPair
+    result.currentIndex = currentIndex
+    result.vertexToIndexDict = vertexToIndexDict
+    return result
+  }
+  
   private var allExchangesByCurrency = [Currency:Set<Exchange>]()
   private var allExchanges = Set<Exchange>()
+  private var exchangeInfoByPair = [Pair:FullExchangeInfo]()
+  private var currentIndex = 0
+  private var vertexToIndexDict = [Vertex:VertexIndex]()
   
   public func getAllExchanges() -> Set<Exchange> {
     return allExchanges
   }
   
-  private var exchangeInfoByPair = [Pair:FullExchangeInfo]()
-  
   public var currenciesCount: Int {
     return currentIndex
   }
-  
-  private var currentIndex = 0
-  private var vertexToIndexDict = [Vertex:VertexIndex]()
   
   public func getIndex(for vertex: Vertex) -> VertexIndex? {
     return vertexToIndexDict[vertex]
@@ -70,7 +78,7 @@ public final class RatesTable {
     exchangeInfoByPair[pair] = newValue
   }
   
-  private func disableEdge(for pair: Pair) -> FullExchangeInfo? {
+  public func disableEdge(for pair: Pair) -> FullExchangeInfo? {
     
     guard var info = exchangeInfoByPair[pair] else {
       return nil
@@ -91,7 +99,7 @@ public final class RatesTable {
     let backwardRateInfo: FullExchangeInfo
   }
   
-  public func disableEdge(for rateInfo: RateInfo) -> DisabledEdgeInfo? {
+  public func disableEdges(for rateInfo: RateInfo) -> DisabledEdgeInfo? {
     
     let pair = rateInfo.toPair
     guard let left = disableEdge(for: pair) else {
@@ -106,7 +114,7 @@ public final class RatesTable {
     return DisabledEdgeInfo(rateInfo: left, backwardRateInfo: right)
   }
   
-  public func enableEdge(for rateInfo: RateInfo, edgeInfo: DisabledEdgeInfo) {
+  public func enableEdges(for rateInfo: RateInfo, edgeInfo: DisabledEdgeInfo) {
     exchangeInfoByPair[rateInfo.toPair] = edgeInfo.rateInfo
     exchangeInfoByPair[rateInfo.toBackwardPair] = edgeInfo.backwardRateInfo
   }

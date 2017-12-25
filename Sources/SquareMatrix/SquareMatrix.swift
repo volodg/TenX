@@ -15,6 +15,13 @@ public final class SquareMatrix<Element> {
     self.defValue = defValue
   }
   
+  public func copy() -> SquareMatrix<Element> {
+    let result = SquareMatrix<Element>(defValue: defValue)
+    result.values = values
+    result.edgeSize = edgeSize
+    return result
+  }
+  
   public subscript(index: (x: Int, y: Int)) -> Element {
     set {
       values[index.y * edgeSize + index.x] = newValue

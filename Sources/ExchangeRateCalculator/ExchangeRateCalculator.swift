@@ -12,14 +12,36 @@ public protocol IndexType: Equatable {
   var index: Int { get }
 }
 
+public enum CalculateRateStrategies {
+  //it tries to build path ignoring cycles
+  case unstrictIgnoreCycles
+  //This strategy prohibits addition of
+  //new vertices that can lead to cycles
+  case strict
+  //in case of path's cycles
+  //just returns it, so result might be like
+  //BTC -> ETH -> BTC
+  //it allows user to get unlimited profit
+  case unstrictAllowCycle
+}
+
 public final class ExchangeRateCalculator<Index: IndexType> {
   
-  public init() {}
+  public convenience init() {
+    self.init(rate: SquareMatrix(defValue: 0), next: SquareMatrix(defValue: nil))
+  }
   
-  private lazy var rate: SquareMatrix<Double> = {
-    return SquareMatrix<Double>(defValue: 0)
-  }()
-  private let next = SquareMatrix<Index?>(defValue: nil)
+  private init(rate: SquareMatrix<Double>, next: SquareMatrix<Index?>) {
+    self.rate = rate
+    self.next = next
+  }
+  
+  public func copy() -> ExchangeRateCalculator<Index> {
+    return ExchangeRateCalculator(rate: rate.copy(), next: next.copy())
+  }
+  
+  private let rate: SquareMatrix<Double>
+  private let next: SquareMatrix<Index?>
   
   public func updateRatesTable(currenciesCount: Int, elements: [(source: Index, destination: Index, weight: Double)]) {
     
@@ -49,7 +71,7 @@ public final class ExchangeRateCalculator<Index: IndexType> {
     case cyclicPath(source: Index, destination: Index)
   }
   
-  public func bestRatesPath(source: Index, destination: Index, allowCycle: Bool) -> Result<[Index],BestRatesPathError> {
+  public func bestRatesPath(source: Index, destination: Index, strategy: CalculateRateStrategies) -> Result<[Index],BestRatesPathError> {
     if next[(source.index, destination.index)] == nil {
       return .success([])
     }
@@ -63,11 +85,15 @@ public final class ExchangeRateCalculator<Index: IndexType> {
       }
       currentSource = nextSource
       if result.contains(currentSource) {
-        if allowCycle {
+        switch strategy {
+        case .strict:
+          assert(false, "algorithm bug, please try to fix")
+          return .failure(.cyclicPath(source: source, destination: destination))
+        case .unstrictAllowCycle:
           return .success(result + [currentSource])
+        case .unstrictIgnoreCycles:
+          return .success(result)
         }
-        assert(false, "algorithm bug, please try to fix")
-        return .failure(.cyclicPath(source: source, destination: destination))
       }
       result.append(currentSource)
     }
