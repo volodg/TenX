@@ -41,18 +41,30 @@ extension RateInfo {
     
     //do not check current edge
     let oldInfo = ratesTable.disableEdge(for: self)
+    exchangeRateCalculator.updateRatesTable(
+      currenciesCount: ratesTable.currenciesCount,
+      elements: ratesTable.allEdges)
     
     let vertexIndexes = exchangeRateCalculator
       .bestRatesPath(source: source, destination: destination)
     
-    //enable current pair
-    if let oldInfo = oldInfo {
-      ratesTable.enableEdge(for: self, fullInfo: oldInfo)
+    func enableEdge() {
+      //enable current Edge
+      if let oldInfo = oldInfo {
+        ratesTable.enableEdge(for: self, fullInfo: oldInfo)
+        exchangeRateCalculator.updateRatesTable(
+          currenciesCount: ratesTable.currenciesCount,
+          elements: ratesTable.allEdges)
+        print("ratesTable.allEdges: \(ratesTable.allEdges)")
+      }
     }
     
-    guard let rate = ratesTable.getRate(for: vertexIndexes) else {
+    guard let rate = ratesTable.getRate(for: vertexIndexes), rate != 0 else {
+      enableEdge()
       return true
     }
+    
+    enableEdge()
     
     let result = weight <= 1/rate
     if let error = Log.error, !result {

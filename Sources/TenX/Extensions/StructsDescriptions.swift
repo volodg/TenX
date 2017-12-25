@@ -18,3 +18,15 @@ extension Exchange: CustomStringConvertible {
     return "Exchange: \(rawValue)"
   }
 }
+
+extension Vertex: CustomStringConvertible {
+  public var description: String {
+    return "\(currency):\(exchange)"
+  }
+}
+
+ extension VertexIndex: CustomStringConvertible {
+  public var description: String {
+    return "\(vertex):\(index)"
+  }
+}
