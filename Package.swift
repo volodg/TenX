@@ -46,7 +46,7 @@ let package = Package(
       dependencies: []),
     .target(
       name: "ExchangeRateCalculator",
-      dependencies: ["SquareMatrix"]),
+      dependencies: ["SquareMatrix", "Result"]),
     .target(
       name: "RatesTable",
       dependencies: []),
