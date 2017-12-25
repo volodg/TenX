@@ -21,7 +21,6 @@ public final class ExchangeRateCalculator<Index: IndexType> {
   }()
   private let next = SquareMatrix<Index?>(defValue: nil)
   
-  //TODO test
   public func updateRatesTable(currenciesCount: Int, elements: [(source: Index, destination: Index, weight: Double)]) {
     
     rate.reallocate(newEdgeSize: currenciesCount)
@@ -45,8 +44,7 @@ public final class ExchangeRateCalculator<Index: IndexType> {
     }
   }
   
-  //TODO test
-  public func bestRatesPath(source: Index, destination: Index) -> [Index] {
+  public func bestRatesPath(source: Index, destination: Index, allowCycle: Bool) -> [Index] {
     if next[(source.index, destination.index)] == nil {
       return []
     }
@@ -56,7 +54,10 @@ public final class ExchangeRateCalculator<Index: IndexType> {
       //TODO fix force unwrapp
       currentSource = next[(currentSource.index, destination.index)]!
       if result.contains(currentSource) {
-        assert(false)
+        if allowCycle {
+          return result + [currentSource]
+        }
+        assert(false, "critical algorithm bug")
         return []
       }
       result.append(currentSource)

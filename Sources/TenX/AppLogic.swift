@@ -24,7 +24,7 @@ enum CalculateRateStrategies {
 
 final class AppLogic {
   
-  private let strategy: CalculateRateStrategies
+  let strategy: CalculateRateStrategies
   
   init(strategy: CalculateRateStrategies) {
     self.strategy = strategy
@@ -92,8 +92,16 @@ final class AppLogic {
       return .failure(.undefinedSouce)
     }
     
+    let allowCycle: Bool
+    switch strategy {
+    case .strict:
+      allowCycle = false
+    case .unstrict:
+      allowCycle = true
+    }
+    
     let vertexIndexes = exchangeRateCalculator
-      .bestRatesPath(source: source, destination: destination)
+      .bestRatesPath(source: source, destination: destination, allowCycle: allowCycle)
     
     guard let rate = ratesTable.getRate(for: vertexIndexes) else {
       return .failure(.invalidPath(path: vertexIndexes))
