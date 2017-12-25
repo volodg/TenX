@@ -42,26 +42,25 @@ final class AppLogic {
     return ratesTable.getAllExchanges()
   }
   
-  private func disableEdge(for pair: Pair) {
-    _ = ratesTable.disableEdge(for: pair)
+  private func updateRatesTable() {
     exchangeRateCalculator.updateRatesTable(
       currenciesCount: ratesTable.currenciesCount,
       elements: ratesTable.allEdges)
   }
   
+  private func disableEdge(for pair: Pair) {
+    _ = ratesTable.disableEdge(for: pair)
+  }
+  
   func disableEdges(for rateInfo: RateInfo) -> RatesTable.DisabledEdgeInfo? {
     let result = ratesTable.disableEdges(for: rateInfo)
-    exchangeRateCalculator.updateRatesTable(
-      currenciesCount: ratesTable.currenciesCount,
-      elements: ratesTable.allEdges)
+    updateRatesTable()
     return result
   }
   
   func enableEdges(for rateInfo: RateInfo, edgeInfo: RatesTable.DisabledEdgeInfo) {
     ratesTable.enableEdges(for: rateInfo, edgeInfo: edgeInfo)
-    exchangeRateCalculator.updateRatesTable(
-      currenciesCount: ratesTable.currenciesCount,
-      elements: ratesTable.allEdges)
+    updateRatesTable()
   }
   
   func update(rateInfo: RateInfo) -> Result<Void,RateInfoValidationError> {
@@ -70,10 +69,7 @@ final class AppLogic {
     }
     
     ratesTable.update(rateInfo: rateInfo)
-    
-    exchangeRateCalculator.updateRatesTable(
-      currenciesCount: ratesTable.currenciesCount,
-      elements: ratesTable.allEdges)
+    updateRatesTable()
     
     return .success(())
   }
@@ -95,6 +91,21 @@ final class AppLogic {
     return AppLogic(strategy: strategy,
                     exchangeRateCalculator: exchangeRateCalculator.copy(),
                     ratesTable: ratesTable.copy())
+  }
+  
+  private func disableEdges(for vertexIndexes: [VertexIndex]) {
+    guard let first = vertexIndexes.first, let last = vertexIndexes.last, first != last else {
+      assert(false, "logic error")
+      return
+    }
+    
+    for i in 0..<(vertexIndexes.count - 1) {
+      let pairToDisable = Pair(source: vertexIndexes[i].vertex, destination: vertexIndexes[i + 1].vertex)
+      _ = disableEdge(for: pairToDisable)
+    }
+    let pairToDisable = Pair(source: last.vertex, destination: first.vertex)
+    _ = disableEdge(for: pairToDisable)
+    updateRatesTable()
   }
   
   private func bestRatesPath(for pair: Pair) -> Result<[VertexIndex],GetRateError> {
@@ -123,17 +134,14 @@ final class AppLogic {
           let newPair = Pair(source: last.vertex, destination: pair.destination)
           
           let copy = self.copy()
-          
-          for i in 0..<(vertexIndexes.count - 1) {
-            let pairToDisable = Pair(source: vertexIndexes[i].vertex, destination: vertexIndexes[i + 1].vertex)
-            _ = copy.disableEdge(for: pairToDisable)
-          }
-          let pairToDisable = Pair(source: last.vertex, destination: pair.source)
-          _ = copy.disableEdge(for: pairToDisable)
+          copy.disableEdges(for: vertexIndexes)
           
           switch copy.bestRatesPath(for: newPair) {
           case .success(let newValues):
-            result.append(contentsOf: newValues[1...])
+            if !newValues.isEmpty {
+              result.append(contentsOf: newValues[1...])
+            }
+            assert(newValues.count >= 2, "logic error, new sub path should not be empty")
           case .failure(let error):
             return .failure(error)
           }
