@@ -6,20 +6,8 @@
 //
 
 import Parser
-import Commons
 import RatesTable
-import Parser
 import ExchangeRateCalculator
-
-var line: String?
-repeat {
-  line = readTestLine()//readLine()
-  if let line = line {
-    //print("line: \(line)")
-    let cmd = CommandsParser.parse(line: line)
-    print("cmd: \(cmd)")
-  }
-} while line != nil
 
 extension VertexIndex: IndexType {}
 
@@ -27,10 +15,11 @@ private let exchangeRateCalculator = ExchangeRateCalculator<VertexIndex>()
 
 private let ratesTable = RatesTable()
 
-testVertexes.forEach { rateInfo in
+func updateRates(updateRatesInfo: UpdateRatesInfo) {
   
-  guard rateInfo.isValid(ratesTable: ratesTable,
-                         exchangeRateCalculator: exchangeRateCalculator) else {
+  let rateInfo = updateRatesInfo.toRateInfo
+  
+  guard rateInfo.isValid(ratesTable: ratesTable, exchangeRateCalculator: exchangeRateCalculator) else {
     return
   }
   
@@ -41,6 +30,24 @@ testVertexes.forEach { rateInfo in
     elements: ratesTable.allEdges)
 }
 
+var currentLine: String?
+repeat {
+  currentLine = readTestLine()//readLine()
+  if let line = currentLine {
+    let cmd = CommandsParser.parse(line: line)
+    switch cmd {
+    case .success(let cmd):
+      switch cmd {
+        case .updateRates(let updateRatesInfo):
+          updateRates(updateRatesInfo: updateRatesInfo)
+        case .exchangeRateRequest(let exchangeRateRequestInfo):
+          break
+      }
+    case .failure(let error):
+      print("error: \(error.error)")
+    }
+  }
+} while currentLine != nil
 
 func processBestPath(
   sourceCurrency: String,

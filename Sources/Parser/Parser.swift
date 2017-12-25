@@ -35,6 +35,17 @@ public enum Command {
   case exchangeRateRequest(ExchangeRateRequestInfo)
 }
 
+private extension DateFormatter {
+  
+  static var RFC3339DateFormatter: DateFormatter {
+    let dateFormatter = DateFormatter()
+    dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+    dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
+    dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+    return dateFormatter
+  }
+}
+
 public enum CommandsParser {
   
   private static func parseExchangeRateRequest(components: [String]) -> Result<Command, ParseError> {
@@ -43,24 +54,51 @@ public enum CommandsParser {
       return .failure(ParseError(error: "wrong components count"))
     }
     
-    let cmdComponents = components.map { $0.uppercased() }
-    
-    guard cmdComponents[0] == "EXCHANGE_RATE_REQUEST" else {
+    guard components[0] == "EXCHANGE_RATE_REQUEST" else {
       return .failure(ParseError(error: "wrong components count"))
     }
     
     let result = ExchangeRateRequestInfo(
-      sourceExchange: cmdComponents[1],
-      sourceCurrency: cmdComponents[2],
-      destinationExchange: cmdComponents[3],
-      destinationCurrency: cmdComponents[4])
+      sourceExchange: components[1],
+      sourceCurrency: components[2],
+      destinationExchange: components[3],
+      destinationCurrency: components[4])
     
     return .success(.exchangeRateRequest(result))
   }
   
+  //2017-11-01T09:42:23+00:05 KRAKEN ETH XRP 1 1
   private static func parseUpdateRates(components: [String]) -> Result<Command, ParseError> {
     
-    return .failure(ParseError(error: "test error"))
+    guard components.count >= 6 else {
+      return .failure(ParseError(error: "wrong components count"))
+    }
+    
+    let dateFormatter = DateFormatter.RFC3339DateFormatter
+    let dateStr = components[0]
+    guard let date = dateFormatter.date(from: components[0]) else {
+      return .failure(ParseError(error: "invalid date format: \(dateStr)"))
+    }
+    
+    let rateStr = components[4]
+    guard let rate = Double(rateStr) else {
+      return .failure(ParseError(error: "invalid rate format: \(rateStr)"))
+    }
+    
+    let backwardRateStr = components[5]
+    guard let backwardRate = Double(backwardRateStr) else {
+      return .failure(ParseError(error: "invalid backwardRate format: \(backwardRateStr)"))
+    }
+    
+    let result = UpdateRatesInfo(
+      updateTime: date,
+      exchange: components[1],
+      sourceCurrency: components[2],
+      destinationCurrency: components[3],
+      rate: rate,
+      backwardRate: backwardRate)
+    
+    return .success(.updateRates(result))
   }
   
   public static func parse(line: String) -> Result<Command, ParseError> {
@@ -68,8 +106,10 @@ public enum CommandsParser {
     let components = line.components(separatedBy: .whitespacesAndNewlines)
       .filter { !$0.isEmpty }
     
-    let result = parseExchangeRateRequest(components: components)
-      .flatMapError { _ in parseUpdateRates(components: components) }
+    let cmdComponents = components.map { $0.uppercased() }
+    
+    let result = parseExchangeRateRequest(components: cmdComponents)
+      .flatMapError { _ in parseUpdateRates(components: cmdComponents) }
     
     return result
   }
