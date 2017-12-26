@@ -81,12 +81,12 @@ public enum CommandsParser {
     }
     
     let rateStr = components[4]
-    guard let rate = Double(rateStr) else {
+    guard let rate = Double(rateStr), rate >= 0.0 else {
       return .failure(ParseError(error: "invalid rate format: \(rateStr)"))
     }
     
     let backwardRateStr = components[5]
-    guard let backwardRate = Double(backwardRateStr) else {
+    guard let backwardRate = Double(backwardRateStr), backwardRate >= 0.0 else {
       return .failure(ParseError(error: "invalid backwardRate format: \(backwardRateStr)"))
     }
     

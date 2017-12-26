@@ -14,7 +14,6 @@ enum RateInfoValidationError<RateT>: Error {
   case invalidWeight(info: RateInfo<RateT>, rate: RateT, maximumRate: RateT)
   case invalidBackwardWeight(info: RateInfo<RateT>, rate: RateT, maximumRate: RateT)
   case invalidSourceOrDestination(info: RateInfo<RateT>)
-  case negativeWeight(info: RateInfo<RateT>)
 }
 
 extension RateInfo where RateT == RateGroupType {
@@ -105,10 +104,6 @@ extension RateInfo where RateT: Maximum & Group {
     
     guard source != destination else {
       return .invalidSourceOrDestination(info: self)
-    }
-    
-    guard !RateT.maximum().less(weight) && !RateT.maximum().less(backwardWeight) else {
-      return .negativeWeight(info: self)
     }
     
     switch appLogic.strategy {
