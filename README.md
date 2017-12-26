@@ -11,7 +11,7 @@ TenX Technical Exercise.
 
 $ swift build
 
-Output ofr Mac OS X:
+Output example for Mac OS X:
 Compile Swift Module 'AppLogic' (6 sources)
 Linking ./.build/x86_64-apple-macosx10.10/debug/TenX
 
