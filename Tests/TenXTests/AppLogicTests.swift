@@ -90,9 +90,79 @@ final class AppLogicTests: XCTestCase {
     }
   }
   
+  func testUnstrictAllowCycleMode() {
+    let appLogic = AppLogic<RateGroupType>(strategy: .unstrictAllowCycle)
+    
+    ratesInfo.forEach { el in
+      let result = appLogic.update(rateInfo: el)
+      switch result {
+      case .success:
+        break
+      case .failure:
+        XCTFail()
+      }
+    }
+    
+    let result = appLogic.getRateInfo(
+      sourceCurrency: Currency(rawValue: "A"),
+      sourceExchange: Exchange(rawValue: "GDAX"),
+      destinationCurrency: Currency(rawValue: "D"),
+      destinationExchange: Exchange(rawValue: "GDAX"))
+    
+    switch result {
+    case .success(let rateInfo):
+      XCTAssertEqual(-1.0, rateInfo.rate.rawValue)
+      XCTAssertEqual("A", rateInfo.path[0].currency.rawValue)
+      XCTAssertEqual("GDAX", rateInfo.path[0].exchange.rawValue)
+      XCTAssertEqual("B", rateInfo.path[1].currency.rawValue)
+      XCTAssertEqual("GDAX", rateInfo.path[1].exchange.rawValue)
+      XCTAssertEqual("C", rateInfo.path[2].currency.rawValue)
+      XCTAssertEqual("GDAX", rateInfo.path[2].exchange.rawValue)
+      XCTAssertEqual("A", rateInfo.path[3].currency.rawValue)
+      XCTAssertEqual("GDAX", rateInfo.path[3].exchange.rawValue)
+    case .failure:
+      XCTFail()
+    }
+  }
+  
+  func testUnstrictIgnoreCyclesMode() {
+    let appLogic = AppLogic<RateGroupType>(strategy: .unstrictIgnoreCycles)
+    
+    ratesInfo.forEach { el in
+      let result = appLogic.update(rateInfo: el)
+      switch result {
+      case .success:
+        break
+      case .failure:
+        XCTFail()
+      }
+    }
+    
+    let result = appLogic.getRateInfo(
+      sourceCurrency: Currency(rawValue: "A"),
+      sourceExchange: Exchange(rawValue: "GDAX"),
+      destinationCurrency: Currency(rawValue: "D"),
+      destinationExchange: Exchange(rawValue: "GDAX"))
+    
+    switch result {
+    case .success(let rateInfo):
+      XCTAssertEqual(3.0, rateInfo.rate.rawValue)
+      XCTAssertEqual("A", rateInfo.path[0].currency.rawValue)
+      XCTAssertEqual("GDAX", rateInfo.path[0].exchange.rawValue)
+      XCTAssertEqual("B", rateInfo.path[1].currency.rawValue)
+      XCTAssertEqual("GDAX", rateInfo.path[1].exchange.rawValue)
+      XCTAssertEqual("D", rateInfo.path[2].currency.rawValue)
+      XCTAssertEqual("GDAX", rateInfo.path[2].exchange.rawValue)
+    case .failure:
+      XCTFail()
+    }
+  }
+  
   static var allTests = [
     ("testStrictMode", testStrictMode),
     ("testRemoveCycles", testRemoveCycles),
+    ("testUnstrictAllowCycleMode", testUnstrictAllowCycleMode),
+    ("testUnstrictIgnoreCyclesMode", testUnstrictIgnoreCyclesMode),
   ]
 }
 
