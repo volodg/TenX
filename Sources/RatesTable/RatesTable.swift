@@ -8,7 +8,7 @@
 import Foundation
 import Commons
 
-public final class RatesTable<RateT: Monoid & Ordered> {
+public final class RatesTable<RateT: Monoid & Maximum> {
   
   public init() {}
   

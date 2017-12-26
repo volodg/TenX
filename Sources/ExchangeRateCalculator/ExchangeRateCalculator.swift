@@ -28,7 +28,7 @@ public enum CalculateRateStrategies {
   case unstrictAllowCycle
 }
 
-public final class ExchangeRateCalculator<Index: IndexType, RateT: Monoid & Ordered> {
+public final class ExchangeRateCalculator<Index: IndexType, RateT: Monoid & Maximum> {
   
   public convenience init() {
     self.init(

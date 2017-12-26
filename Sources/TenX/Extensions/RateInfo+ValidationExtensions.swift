@@ -31,7 +31,7 @@ extension RateInfo where RateT == RateGroupType {
   }
 }
 
-extension RateInfo where RateT: Ordered & Group {
+extension RateInfo where RateT: Maximum & Group {
   private func weightValidationError(
     appLogic: AppLogic<RateT>,
     exchange: Exchange,

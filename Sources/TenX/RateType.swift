@@ -44,14 +44,14 @@ extension RateGroupType: Group {
   }
 }
 
-extension RateGroupType: Ordered {
+extension RateGroupType: Maximum {
   
   static func maximum() -> RateGroupType {
     return RateGroupType(rawValue: 0)
   }
   
   func less(_ than: RateGroupType) -> Bool {
-    //TODO use epsilon: than.rawValue - eps > rawValue
+    //TODO use epsilon? than.rawValue - eps > rawValue
     return rawValue > than.rawValue
   }
   

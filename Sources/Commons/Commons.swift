@@ -28,13 +28,13 @@ public protocol Group: Monoid {
   func inv() -> Self
 }
 
-public protocol Ordered {
+public protocol Maximum {
   static func maximum() -> Self
-  // anyVal.less(Ordered.maximum()) == true
+  // anyVal.less(Maximum.maximum()) == true
   func less(_ than: Self) -> Bool
 }
 
-extension Ordered {
+extension Maximum {
   
   public var isMaximum: Bool {
     let result = !less(Self.maximum()) && !Self.maximum().less(self)

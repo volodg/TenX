@@ -14,7 +14,7 @@ import ExchangeRateCalculator
 //incapsulate Vertex's info inside of VertexIndex
 extension VertexIndex: IndexType {}
 
-final class AppLogic<RateT: Group & Ordered> {
+final class AppLogic<RateT: Group & Maximum> {
   
   var strategy: CalculateRateStrategies
   
