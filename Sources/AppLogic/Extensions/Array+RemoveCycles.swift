@@ -7,6 +7,7 @@
 
 extension Array where Element: Equatable {
   func removeCycles() -> [Element] {
+    guard !isEmpty else { return self }
     for i in 0..<(count - 1) {
       for j in (i + 1)..<count {
         if self[i] == self[j] {

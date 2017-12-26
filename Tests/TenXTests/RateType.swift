@@ -7,7 +7,7 @@
 
 import Commons
 
-typealias RateType = Int
+typealias RateType = Double
 
 struct RateGroupType {
   private let rawValue: RateType
@@ -32,7 +32,7 @@ extension RateGroupType: Semigroup {
 extension RateGroupType: Monoid {
   
   static func e() -> RateGroupType {
-    return RateGroupType(rawValue: 0)
+    return RateGroupType(rawValue: 0.0)
   }
 }
 
@@ -46,7 +46,7 @@ extension RateGroupType: Group {
 extension RateGroupType: Maximum {
   
   static func maximum() -> RateGroupType {
-    return RateGroupType(rawValue: Int.max)
+    return RateGroupType(rawValue: .infinity)
   }
   
   func less(_ than: RateGroupType) -> Bool {
