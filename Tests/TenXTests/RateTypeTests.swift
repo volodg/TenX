@@ -17,7 +17,7 @@ private struct ZeroMaximum: Maximum {
   
   func less(_ than: ZeroMaximum) -> Bool {
     return rawValue > than.rawValue
-  }  
+  }
 }
 
 final class RateTypeTests: XCTestCase {
