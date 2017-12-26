@@ -1,4 +1,5 @@
 import XCTest
+import RatesTable
 @testable import AppLogic
 
 final class AppLogicTests: XCTestCase {
@@ -26,13 +27,67 @@ final class AppLogicTests: XCTestCase {
     }
   }
   
+  private let rates: [(exchange: String, source: String, destination: String, rate: Double, backwardRate: Double)] = [
+    ("GDAX", "A", "B", 1.0 , .infinity),
+    ("GDAX", "B", "C", 1.0 , .infinity),
+    ("GDAX", "C", "A", -3.0, .infinity),
+    ("GDAX", "B", "D", 2.0 , .infinity),
+  ]
+  
+  private lazy var ratesInfo: [RateInfo<RateGroupType>] = {
+    return self.rates.map { el in
+      RateInfo<RateGroupType>(
+        source: Currency(rawValue: el.source),
+        destination: Currency(rawValue: el.destination),
+        exchange: Exchange(rawValue: el.exchange),
+        weight: RateGroupType(rawValue: el.rate),
+        backwardWeight: RateGroupType(rawValue: el.backwardRate),
+        date: Date()
+      )
+    }
+  }()
+  
   func testStrictMode() {
     let appLogic = AppLogic<RateGroupType>(strategy: .strict)
     
-    // This is an example of a functional test case.
-    // Use XCTAssert and related functions to verify your tests produce the correct
-    // results.
-    //XCTAssertEqual(TenX().text, "Hello, World!")
+    var numberOfFailures = 0
+    
+    ratesInfo.forEach { el in
+      let result = appLogic.update(rateInfo: el)
+      switch result {
+      case .success:
+        break
+      case .failure(let error):
+        numberOfFailures += 1
+        XCTAssertEqual(1, numberOfFailures)
+        switch error {
+        case .invalidSourceOrDestination, .invalidBackwardWeight:
+          XCTFail()
+        case .invalidWeight(let info):
+          XCTAssertEqual("C", info.info.source.rawValue)
+          XCTAssertEqual("A", info.info.destination.rawValue)
+        }
+      }
+    }
+    
+    let result = appLogic.getRateInfo(
+      sourceCurrency: Currency(rawValue: "A"),
+      sourceExchange: Exchange(rawValue: "GDAX"),
+      destinationCurrency: Currency(rawValue: "D"),
+      destinationExchange: Exchange(rawValue: "GDAX"))
+    
+    switch result {
+    case .success(let rateInfo):
+      XCTAssertEqual(3.0, rateInfo.rate.rawValue)
+      XCTAssertEqual("A", rateInfo.path[0].currency.rawValue)
+      XCTAssertEqual("GDAX", rateInfo.path[0].exchange.rawValue)
+      XCTAssertEqual("B", rateInfo.path[1].currency.rawValue)
+      XCTAssertEqual("GDAX", rateInfo.path[1].exchange.rawValue)
+      XCTAssertEqual("D", rateInfo.path[2].currency.rawValue)
+      XCTAssertEqual("GDAX", rateInfo.path[2].exchange.rawValue)
+    case .failure:
+      XCTFail()
+    }
   }
   
   static var allTests = [

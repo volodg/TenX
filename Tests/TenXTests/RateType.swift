@@ -10,7 +10,7 @@ import Commons
 typealias RateType = Double
 
 struct RateGroupType {
-  private let rawValue: RateType
+  let rawValue: RateType
   init(rawValue: RateType) {
     self.rawValue = rawValue
   }
