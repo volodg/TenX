@@ -7,7 +7,7 @@
 
 extension AppLogic.PathRateInfo {
   
-  var toResultString: String {
+  public var toResultString: String {
     
     var result = [String]()
     var firstLineComponents = [String]()

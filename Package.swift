@@ -10,6 +10,9 @@ let package = Package(
       name: "TenX",
       targets: ["TenX"]),
     .library(
+      name: "AppLogic",
+      targets: ["AppLogic"]),
+    .library(
       name: "Parser",
       targets: ["Parser"]),
     .library(
@@ -37,9 +40,14 @@ let package = Package(
       name: "TenX",
       dependencies: [
         "Parser",
+        "AppLogic",
+        "CleanroomLogger"
+      ]),
+    .target(
+      name: "AppLogic",
+      dependencies: [
         "ExchangeRateCalculator",
         "RatesTable",
-        "CleanroomLogger",
         "Commons"
       ]),
     .target(
@@ -59,7 +67,9 @@ let package = Package(
       dependencies: []),
     .testTarget(
       name: "TenXTests",
-      dependencies: ["TenX"]),
+      dependencies: [
+        "AppLogic"
+      ]),
     ]
 )
 

@@ -14,11 +14,11 @@ import ExchangeRateCalculator
 //incapsulate Vertex's info inside of VertexIndex
 extension VertexIndex: IndexType {}
 
-final class AppLogic<RateT: Group & Maximum> {
+public final class AppLogic<RateT: Group & Maximum> {
   
   var strategy: CalculateRateStrategies
   
-  convenience init(strategy: CalculateRateStrategies = .unstrictIgnoreCycles) {
+  public convenience init(strategy: CalculateRateStrategies = .unstrictIgnoreCycles) {
     self.init(strategy: strategy,
               exchangeRateCalculator: ExchangeRateCalculator<VertexIndex,RateT>(),
               ratesTable: RatesTable())
@@ -64,7 +64,7 @@ final class AppLogic<RateT: Group & Maximum> {
     updateRatesTable()
   }
   
-  func update(rateInfo: RateInfo<RateT>) -> Result<Void,RateInfoValidationError<RateT>> {
+  public func update(rateInfo: RateInfo<RateT>) -> Result<Void,RateInfoValidationError<RateT>> {
     if let error = rateInfo.validationError(appLogic: self) {
       return .failure(error)
     }
@@ -75,14 +75,14 @@ final class AppLogic<RateT: Group & Maximum> {
     return .success(())
   }
   
-  enum GetRateError: Error {
+  public enum GetRateError: Error {
     case undefinedSouce
     case undefinedDestination
     case invalidBestRatesPath(error: ExchangeRateCalculator<VertexIndex,RateT>.BestRatesPathError)
     case invalidRate(path: [VertexIndex])
   }
   
-  struct PathRateInfo {
+  public struct PathRateInfo {
     let pair: Pair
     let rate: RateT
     let path: [Vertex]

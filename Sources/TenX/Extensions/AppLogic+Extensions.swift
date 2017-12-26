@@ -1,11 +1,12 @@
 //
 //  AppLogic+Extensions.swift
-//  TenX
+//  TenXPackageDescription
 //
-//  Created by Volodymyr  Gorbenko on 25/12/17.
+//  Created by Volodymyr  Gorbenko on 26/12/17.
 //
 
 import Result
+import AppLogic
 import RatesTable
 
 extension AppLogic {
@@ -22,16 +23,4 @@ extension AppLogic {
       destinationCurrency: Currency(rawValue: destinationCurrency),
       destinationExchange: Exchange(rawValue: destinationExchange))
   }
-  
-  func getRateInfo(
-    sourceCurrency: Currency,
-    sourceExchange: Exchange,
-    destinationCurrency: Currency,
-    destinationExchange: Exchange) -> Result<PathRateInfo, GetRateError> {
-    
-    let sourceVertex = Vertex(currency: sourceCurrency, exchange: sourceExchange)
-    let destinationVertex = Vertex(currency: destinationCurrency, exchange: destinationExchange)
-    return getRateInfo(pair: Pair(source: sourceVertex, destination: destinationVertex))
-  }
-  
 }

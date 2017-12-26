@@ -6,6 +6,7 @@
 //
 
 import Parser
+import AppLogic
 import CleanroomLogger
 
 extension AppLogic.GetRateError {

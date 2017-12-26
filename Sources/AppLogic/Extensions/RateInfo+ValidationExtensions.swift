@@ -5,29 +5,15 @@
 //  Created by Volodymyr  Gorbenko on 24/12/17.
 //
 
-import Foundation
+//import Foundation
 import RatesTable
 import Commons
-import ExchangeRateCalculator
+//import ExchangeRateCalculator
 
-enum RateInfoValidationError<RateT>: Error {
+public enum RateInfoValidationError<RateT>: Error {
   case invalidWeight(info: RateInfo<RateT>, rate: RateT, maximumRate: RateT)
   case invalidBackwardWeight(info: RateInfo<RateT>, rate: RateT, maximumRate: RateT)
   case invalidSourceOrDestination(info: RateInfo<RateT>)
-}
-
-extension RateInfo where RateT == RateGroupType {
-  
-  init(source: String, destination: String, exchange: String, weight: Double, backwardWeight: Double, date: Date) {
-    
-    self.init(
-      source: Currency(rawValue: source),
-      destination: Currency(rawValue: destination),
-      exchange: Exchange(rawValue: exchange),
-      weight: RateGroupType(rawValue: weight),
-      backwardWeight: RateGroupType(rawValue: backwardWeight),
-      date: date)
-  }
 }
 
 extension RateInfo where RateT: Maximum & Group {

@@ -6,7 +6,7 @@
 //
 
 import Parser
-import Foundation
+import AppLogic
 import CleanroomLogger
 
 private let appLogic = AppLogic<RateGroupType>(strategy: .unstrictIgnoreCycles)

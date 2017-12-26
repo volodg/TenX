@@ -1,9 +1,9 @@
 import XCTest
-import TenX
+import AppLogic
 
 final class TenXTests: XCTestCase {
   func testStrictMode() {
-    //let appLogic = AppLogic<RateGroupType>(strategy: .strict)
+    let appLogic = AppLogic<RateGroupType>(strategy: .strict)
     
     // This is an example of a functional test case.
     // Use XCTAssert and related functions to verify your tests produce the correct
