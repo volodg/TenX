@@ -14,15 +14,16 @@ public protocol IndexType: Equatable {
 
 public enum CalculateRateStrategies {
   //it tries to build path ignoring cycles
-  //but I am not sure this algorithm will give best result
+  //but in this case the result's rate is not the best,
+  //because best one is "infinity profit"
   case unstrictIgnoreCycles
   //This strategy prohibits addition of
   //new vertices that can lead to cycles
   case strict
   //in case of path's cycles
   //just returns it, so result might be like
-  //BTC -> ETH -> BTC
-  //it allows user to get unlimited profit
+  //(BTC, KRAKEN) -> (ETH, KRAKEN) -> (BTC, KRAKEN)
+  //it allows user to get "infinity profit"
   case unstrictAllowCycle
 }
 

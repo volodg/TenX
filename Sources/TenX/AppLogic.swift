@@ -113,7 +113,7 @@ final class AppLogic {
     }
     
     guard let destination = ratesTable.getIndex(for: pair.destination) else {
-      return .failure(.undefinedSouce)
+      return .failure(.undefinedDestination)
     }
     
     let vertexIndexes = exchangeRateCalculator
