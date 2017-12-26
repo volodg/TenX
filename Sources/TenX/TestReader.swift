@@ -7,6 +7,15 @@
 
 private var lineIndex = 0
 
+let lines2 = [
+  "2017-11-01T09:42:24+00:00 GDAX A B 2 0",
+  "2017-11-01T09:42:25+00:00 GDAX B C 2 0",
+  "2017-11-01T09:42:25+00:00 GDAX C A 1 0",
+  "2017-11-01T09:42:25+00:00 GDAX B D 1 0",
+  
+  "EXCHANGE_RATE_REQUEST GDAX A GDAX D",
+]
+
 let lines = [
   "2017-11-01T09:42:24+00:00 KRAKEN BTC ETH 1.1 0.9",
 //  "2017-11-01T09:42:25+00:00 KRAKEN BTC ETH 0.5 2",
@@ -42,11 +51,11 @@ let lines = [
 
 func readTestLine() -> String? {
   
-  guard lineIndex < lines.count else {
+  guard lineIndex < lines2.count else {
     return nil
   }
   
-  let result = lines[lineIndex]
+  let result = lines2[lineIndex]
   
   lineIndex += 1
   

@@ -15,9 +15,9 @@ extension VertexIndex: IndexType {}
 
 final class AppLogic {
   
-  let strategy: CalculateRateStrategies
+  var strategy: CalculateRateStrategies
   
-  convenience init(strategy: CalculateRateStrategies) {
+  convenience init(strategy: CalculateRateStrategies = .unstrictIgnoreCycles) {
     self.init(strategy: strategy,
               exchangeRateCalculator: ExchangeRateCalculator<VertexIndex>(),
               ratesTable: RatesTable())
@@ -93,17 +93,15 @@ final class AppLogic {
                     ratesTable: ratesTable.copy())
   }
   
-  private func disableEdges(for vertexIndexes: [VertexIndex]) {
-    guard let first = vertexIndexes.first, let last = vertexIndexes.last, first != last else {
+  private func closeCycleByDisablingLastEdge(for vertexIndexes: [VertexIndex]) {
+    guard vertexIndexes.count >= 2 else {
       assert(false, "logic error")
       return
     }
     
-    for i in 0..<(vertexIndexes.count - 1) {
-      let pairToDisable = Pair(source: vertexIndexes[i].vertex, destination: vertexIndexes[i + 1].vertex)
-      _ = disableEdge(for: pairToDisable)
-    }
-    let pairToDisable = Pair(source: last.vertex, destination: first.vertex)
+    let pairToDisable = Pair(
+      source: vertexIndexes[vertexIndexes.count - 2].vertex,
+      destination: vertexIndexes[vertexIndexes.count - 1].vertex)
     _ = disableEdge(for: pairToDisable)
     updateRatesTable()
   }
@@ -134,12 +132,13 @@ final class AppLogic {
           let newPair = Pair(source: last.vertex, destination: pair.destination)
           
           let copy = self.copy()
-          copy.disableEdges(for: vertexIndexes)
+          copy.closeCycleByDisablingLastEdge(for: vertexIndexes)
           
           switch copy.bestRatesPath(for: newPair) {
           case .success(let newValues):
             if !newValues.isEmpty {
               result.append(contentsOf: newValues[1...])
+              result = result.removeCycles()
             }
             assert(newValues.count >= 2, "logic error, new sub path should not be empty")
           case .failure(let error):
