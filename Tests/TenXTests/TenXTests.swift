@@ -3,8 +3,7 @@ import TenX
 
 final class TenXTests: XCTestCase {
   func testStrictMode() {
-    let appLogic = AppLogic(strategy: .strict)
-    //appLogic.
+    //let appLogic = AppLogic<RateGroupType>(strategy: .strict)
     
     // This is an example of a functional test case.
     // Use XCTAssert and related functions to verify your tests produce the correct

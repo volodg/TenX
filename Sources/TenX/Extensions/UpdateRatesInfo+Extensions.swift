@@ -10,7 +10,7 @@ import RatesTable
 
 extension UpdateRatesInfo {
   
-  var toRateInfo: RateInfo {
+  var toRateInfo: RateInfo<RateGroupType> {
     return RateInfo(
       source: sourceCurrency,
       destination: destinationCurrency,

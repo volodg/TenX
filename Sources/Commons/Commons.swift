@@ -29,7 +29,15 @@ public protocol Group: Monoid {
 }
 
 public protocol Ordered {
-  static func neutral() -> Self
-  // anyVal.less(Ordered.neutral()) == true
+  static func maximum() -> Self
+  // anyVal.less(Ordered.maximum()) == true
   func less(_ than: Self) -> Bool
+}
+
+extension Ordered {
+  
+  public var isMaximum: Bool {
+    let result = !less(Self.maximum()) && !Self.maximum().less(self)
+    return result
+  }
 }

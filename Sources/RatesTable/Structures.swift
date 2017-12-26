@@ -45,15 +45,15 @@ extension Exchange: Hashable {
   }
 }
 
-public struct RateInfo {
+public struct RateInfo<RateT> {
   public let source: Currency
   public let destination: Currency
   public let exchange: Exchange
-  public let weight: Double
-  public let backwardWeight: Double
+  public let weight: RateT
+  public let backwardWeight: RateT
   let date: Date
   
-  public init(source: Currency, destination: Currency, exchange: Exchange, weight: Double, backwardWeight: Double, date: Date) {
+  public init(source: Currency, destination: Currency, exchange: Exchange, weight: RateT, backwardWeight: RateT, date: Date) {
     self.source = source
     self.destination = destination
     self.exchange = exchange
@@ -107,13 +107,13 @@ extension Pair: Hashable {
   }
 }
 
-struct ExchangeInfo {
-  internal(set) var weight: Double
+struct ExchangeInfo<RateT> {
+  internal(set) var weight: RateT
   let date: Date
 }
 
-public struct FullExchangeInfo {
-  internal(set) var exchangeInfo: ExchangeInfo
+public struct FullExchangeInfo<RateT> {
+  internal(set) var exchangeInfo: ExchangeInfo<RateT>
   let source: VertexIndex
   let destination: VertexIndex
 }

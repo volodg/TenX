@@ -53,7 +53,7 @@ let package = Package(
       dependencies: ["SquareMatrix", "Result"]),
     .target(
       name: "RatesTable",
-      dependencies: []),
+      dependencies: ["Commons"]),
     .target(
       name: "Commons",
       dependencies: []),

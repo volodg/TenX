@@ -12,6 +12,15 @@ typealias RateType = Double
 
 struct RateGroupType {
   private let rawValue: RateType
+  init(rawValue: RateType) {
+    self.rawValue = rawValue
+  }
+}
+
+extension RateGroupType: CustomStringConvertible {
+  var description: String {
+    return "\(rawValue)"
+  }
 }
 
 extension RateGroupType: Semigroup {
@@ -37,11 +46,12 @@ extension RateGroupType: Group {
 
 extension RateGroupType: Ordered {
   
-  static func neutral() -> RateGroupType {
+  static func maximum() -> RateGroupType {
     return RateGroupType(rawValue: 0)
   }
   
   func less(_ than: RateGroupType) -> Bool {
+    //TODO use epsilon: than.rawValue - eps > rawValue
     return rawValue > than.rawValue
   }
   

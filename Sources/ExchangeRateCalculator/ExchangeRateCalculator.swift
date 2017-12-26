@@ -7,6 +7,7 @@
 
 import SquareMatrix
 import Result
+import Commons
 
 public protocol IndexType: Equatable {
   var index: Int { get }
@@ -27,25 +28,27 @@ public enum CalculateRateStrategies {
   case unstrictAllowCycle
 }
 
-public final class ExchangeRateCalculator<Index: IndexType> {
+public final class ExchangeRateCalculator<Index: IndexType, RateT: Monoid & Ordered> {
   
   public convenience init() {
-    self.init(rate: SquareMatrix(defValue: 0), next: SquareMatrix(defValue: nil))
+    self.init(
+      rate: SquareMatrix(defValue: RateT.maximum()),
+      next: SquareMatrix(defValue: nil))
   }
   
-  private init(rate: SquareMatrix<Double>, next: SquareMatrix<Index?>) {
+  private init(rate: SquareMatrix<RateT>, next: SquareMatrix<Index?>) {
     self.rate = rate
     self.next = next
   }
   
-  public func copy() -> ExchangeRateCalculator<Index> {
+  public func copy() -> ExchangeRateCalculator<Index, RateT> {
     return ExchangeRateCalculator(rate: rate.copy(), next: next.copy())
   }
   
-  private let rate: SquareMatrix<Double>
+  private let rate: SquareMatrix<RateT>
   private let next: SquareMatrix<Index?>
   
-  public func updateRatesTable(currenciesCount: Int, elements: [(source: Index, destination: Index, weight: Double)]) {
+  public func updateRatesTable(currenciesCount: Int, elements: [(source: Index, destination: Index, weight: RateT)]) {
     
     rate.reallocate(newEdgeSize: currenciesCount)
     next.reallocate(newEdgeSize: currenciesCount)
@@ -58,8 +61,8 @@ public final class ExchangeRateCalculator<Index: IndexType> {
     for k in 0..<currenciesCount {
       for i in 0..<currenciesCount {
         for j in 0..<currenciesCount {
-          let newRate = rate[(i, k)] * rate[(k, j)]
-          if rate[(i, j)] < newRate {
+          let newRate = rate[(i, k)].op(rate[(k, j)])
+          if newRate.less(rate[(i, j)]) {
             rate[(i, j)] = newRate
             next[(i, j)] = next[(i, k)]
           }

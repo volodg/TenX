@@ -7,16 +7,17 @@
 
 import Foundation
 import RatesTable
+import Commons
 import ExchangeRateCalculator
 
-enum RateInfoValidationError: Error {
-  case invalidWeight(info: RateInfo, rate: Double, maximumRate: Double)
-  case invalidBackwardWeight(info: RateInfo, rate: Double, maximumRate: Double)
-  case invalidSourceOrDestination(info: RateInfo)
-  case negatoveWeight(info: RateInfo)
+enum RateInfoValidationError<RateT>: Error {
+  case invalidWeight(info: RateInfo<RateT>, rate: RateT, maximumRate: RateT)
+  case invalidBackwardWeight(info: RateInfo<RateT>, rate: RateT, maximumRate: RateT)
+  case invalidSourceOrDestination(info: RateInfo<RateT>)
+  case negativeWeight(info: RateInfo<RateT>)
 }
 
-extension RateInfo {
+extension RateInfo where RateT == RateGroupType {
   
   init(source: String, destination: String, exchange: String, weight: Double, backwardWeight: Double, date: Date) {
     
@@ -24,16 +25,18 @@ extension RateInfo {
       source: Currency(rawValue: source),
       destination: Currency(rawValue: destination),
       exchange: Exchange(rawValue: exchange),
-      weight: weight,
-      backwardWeight: backwardWeight,
+      weight: RateGroupType(rawValue: weight),
+      backwardWeight: RateGroupType(rawValue: backwardWeight),
       date: date)
   }
-  
+}
+
+extension RateInfo where RateT: Ordered & Group {
   private func weightValidationError(
-    appLogic: AppLogic,
+    appLogic: AppLogic<RateT>,
     exchange: Exchange,
     reverted: Bool,
-    var stop: inout Bool) -> RateInfoValidationError? {
+    var stop: inout Bool) -> RateInfoValidationError<RateT>? {
     
     let rateInfo = appLogic.getRateInfo(
       sourceCurrency: self.destination,
@@ -45,17 +48,17 @@ extension RateInfo {
       return nil
     }
     
-    guard rate != 0 else {
+    guard !rate.isMaximum else {
       stop = true
       return nil
     }
     
-    let result = weight <= 1/rate
+    let result = !(weight.less(rate.inv()))
     if !result {
       if reverted {
-        return .invalidBackwardWeight(info: self, rate: weight, maximumRate: 1/rate)
+        return .invalidBackwardWeight(info: self, rate: weight, maximumRate: rate.inv())
       } else {
-        return .invalidWeight(info: self, rate: weight, maximumRate: 1/rate)
+        return .invalidWeight(info: self, rate: weight, maximumRate: rate.inv())
       }
     }
     
@@ -63,7 +66,7 @@ extension RateInfo {
     return nil
   }
   
-  private func weightValidationError(appLogic: AppLogic, reverted: Bool) -> RateInfoValidationError? {
+  private func weightValidationError(appLogic: AppLogic<RateT>, reverted: Bool) -> RateInfoValidationError<RateT>? {
     
     //do not check current edge, because it going to be replaced
     let oldEdgeInfo = appLogic.disableEdges(for: self)
@@ -78,7 +81,7 @@ extension RateInfo {
     
     let allExchanges = appLogic.getAllExchanges().union([exchange])
     
-    var result: RateInfoValidationError? = nil
+    var result: RateInfoValidationError<RateT>? = nil
     
     var stop = false
     
@@ -98,14 +101,14 @@ extension RateInfo {
     return result
   }
   
-  func validationError(appLogic: AppLogic) -> RateInfoValidationError? {
+  func validationError(appLogic: AppLogic<RateT>) -> RateInfoValidationError<RateT>? {
     
     guard source != destination else {
       return .invalidSourceOrDestination(info: self)
     }
     
-    guard weight >= 0.0 && backwardWeight >= 0.0 else {
-      return .negatoveWeight(info: self)
+    guard !RateT.maximum().less(weight) && !RateT.maximum().less(backwardWeight) else {
+      return .negativeWeight(info: self)
     }
     
     switch appLogic.strategy {
@@ -115,9 +118,9 @@ extension RateInfo {
       return nil
     }
     
-    let result = weight == 0.0 || backwardWeight <= 1/weight
+    let result = weight.isMaximum || !(backwardWeight.less(weight.inv()))
     if !result {
-      return .invalidBackwardWeight(info: self, rate: backwardWeight, maximumRate: 1/weight)
+      return .invalidBackwardWeight(info: self, rate: backwardWeight, maximumRate: weight.inv())
     }
     
     for reverted in [false, true] {

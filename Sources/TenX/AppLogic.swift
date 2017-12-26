@@ -6,6 +6,7 @@
 //
 
 import Result
+import Commons
 import RatesTable
 import ExchangeRateCalculator
 
@@ -13,26 +14,26 @@ import ExchangeRateCalculator
 //incapsulate Vertex's info inside of VertexIndex
 extension VertexIndex: IndexType {}
 
-final class AppLogic {
+final class AppLogic<RateT: Group & Ordered> {
   
   var strategy: CalculateRateStrategies
   
   convenience init(strategy: CalculateRateStrategies = .unstrictIgnoreCycles) {
     self.init(strategy: strategy,
-              exchangeRateCalculator: ExchangeRateCalculator<VertexIndex>(),
+              exchangeRateCalculator: ExchangeRateCalculator<VertexIndex,RateT>(),
               ratesTable: RatesTable())
   }
   
   private init(strategy: CalculateRateStrategies,
-               exchangeRateCalculator: ExchangeRateCalculator<VertexIndex>,
-               ratesTable: RatesTable) {
+               exchangeRateCalculator: ExchangeRateCalculator<VertexIndex,RateT>,
+               ratesTable: RatesTable<RateT>) {
     self.strategy = strategy
     self.exchangeRateCalculator = exchangeRateCalculator
     self.ratesTable = ratesTable
   }
   
-  private let exchangeRateCalculator: ExchangeRateCalculator<VertexIndex>
-  private let ratesTable: RatesTable
+  private let exchangeRateCalculator: ExchangeRateCalculator<VertexIndex,RateT>
+  private let ratesTable: RatesTable<RateT>
   
   func getIndex(for vertex: Vertex) -> VertexIndex? {
     return ratesTable.getIndex(for: vertex)
@@ -52,18 +53,18 @@ final class AppLogic {
     _ = ratesTable.disableEdge(for: pair)
   }
   
-  func disableEdges(for rateInfo: RateInfo) -> RatesTable.DisabledEdgeInfo? {
+  func disableEdges(for rateInfo: RateInfo<RateT>) -> RatesTable<RateT>.DisabledEdgeInfo? {
     let result = ratesTable.disableEdges(for: rateInfo)
     updateRatesTable()
     return result
   }
   
-  func enableEdges(for rateInfo: RateInfo, edgeInfo: RatesTable.DisabledEdgeInfo) {
+  func enableEdges(for rateInfo: RateInfo<RateT>, edgeInfo: RatesTable<RateT>.DisabledEdgeInfo) {
     ratesTable.enableEdges(for: rateInfo, edgeInfo: edgeInfo)
     updateRatesTable()
   }
   
-  func update(rateInfo: RateInfo) -> Result<Void,RateInfoValidationError> {
+  func update(rateInfo: RateInfo<RateT>) -> Result<Void,RateInfoValidationError<RateT>> {
     if let error = rateInfo.validationError(appLogic: self) {
       return .failure(error)
     }
@@ -77,20 +78,21 @@ final class AppLogic {
   enum GetRateError: Error {
     case undefinedSouce
     case undefinedDestination
-    case invalidBestRatesPath(error: ExchangeRateCalculator<VertexIndex>.BestRatesPathError)
+    case invalidBestRatesPath(error: ExchangeRateCalculator<VertexIndex,RateT>.BestRatesPathError)
     case invalidRate(path: [VertexIndex])
   }
   
   struct PathRateInfo {
     let pair: Pair
-    let rate: Double
+    let rate: RateT
     let path: [Vertex]
   }
   
   private func copy() -> AppLogic {
-    return AppLogic(strategy: strategy,
-                    exchangeRateCalculator: exchangeRateCalculator.copy(),
-                    ratesTable: ratesTable.copy())
+    return AppLogic<RateT>(
+      strategy: strategy,
+      exchangeRateCalculator: exchangeRateCalculator.copy(),
+      ratesTable: ratesTable.copy())
   }
   
   private func closeCycleByDisablingLastEdge(for vertexIndexes: [VertexIndex]) {

@@ -6,13 +6,14 @@
 //
 
 import Foundation
+import Commons
 
-public final class RatesTable {
+public final class RatesTable<RateT: Monoid & Ordered> {
   
   public init() {}
   
   public func copy() -> RatesTable {
-    let result = RatesTable()
+    let result = RatesTable<RateT>()
     result.allExchangesByCurrency = allExchangesByCurrency
     result.allExchanges = allExchanges
     result.exchangeInfoByPair = exchangeInfoByPair
@@ -23,7 +24,7 @@ public final class RatesTable {
   
   private var allExchangesByCurrency = [Currency:Set<Exchange>]()
   private var allExchanges = Set<Exchange>()
-  private var exchangeInfoByPair = [Pair:FullExchangeInfo]()
+  private var exchangeInfoByPair = [Pair:FullExchangeInfo<RateT>]()
   private var currentIndex = 0
   private var vertexToIndexDict = [Vertex:VertexIndex]()
   
@@ -50,11 +51,11 @@ public final class RatesTable {
     return result
   }
   
-  public func forEach(_ body: (FullExchangeInfo) -> Void) {
+  public func forEach(_ body: (FullExchangeInfo<RateT>) -> Void) {
     exchangeInfoByPair.forEach { body($0.value) }
   }
   
-  public typealias EdgeWithWeight = (source: VertexIndex, destination: VertexIndex, weight: Double)
+  public typealias EdgeWithWeight = (source: VertexIndex, destination: VertexIndex, weight: RateT)
   
   public var allEdges: [EdgeWithWeight] {
     return exchangeInfoByPair.map { (_, value) -> EdgeWithWeight in
@@ -62,7 +63,7 @@ public final class RatesTable {
     }
   }
   
-  private func update(pair: Pair, exchangeInfo: ExchangeInfo) {
+  private func update(pair: Pair, exchangeInfo: ExchangeInfo<RateT>) {
     
     if let oldExchangeInfo = exchangeInfoByPair[pair],
       exchangeInfo.date < oldExchangeInfo.exchangeInfo.date {
@@ -78,28 +79,28 @@ public final class RatesTable {
     exchangeInfoByPair[pair] = newValue
   }
   
-  public func disableEdge(for pair: Pair) -> FullExchangeInfo? {
+  public func disableEdge(for pair: Pair) -> FullExchangeInfo<RateT>? {
     
     guard var info = exchangeInfoByPair[pair] else {
       return nil
     }
     
     let oldInfo = info
-    info.exchangeInfo.weight = 0
+    info.exchangeInfo.weight = RateT.maximum()
     exchangeInfoByPair[pair] = info
     return oldInfo
   }
   
-  private func enableEdge(for pair: Pair, fullInfo: FullExchangeInfo) {
+  private func enableEdge(for pair: Pair, fullInfo: FullExchangeInfo<RateT>) {
     exchangeInfoByPair[pair] = fullInfo
   }
   
   public struct DisabledEdgeInfo {
-    let rateInfo: FullExchangeInfo
-    let backwardRateInfo: FullExchangeInfo
+    let rateInfo: FullExchangeInfo<RateT>
+    let backwardRateInfo: FullExchangeInfo<RateT>
   }
   
-  public func disableEdges(for rateInfo: RateInfo) -> DisabledEdgeInfo? {
+  public func disableEdges(for rateInfo: RateInfo<RateT>) -> DisabledEdgeInfo? {
     
     let pair = rateInfo.toPair
     guard let left = disableEdge(for: pair) else {
@@ -114,12 +115,12 @@ public final class RatesTable {
     return DisabledEdgeInfo(rateInfo: left, backwardRateInfo: right)
   }
   
-  public func enableEdges(for rateInfo: RateInfo, edgeInfo: DisabledEdgeInfo) {
+  public func enableEdges(for rateInfo: RateInfo<RateT>, edgeInfo: DisabledEdgeInfo) {
     exchangeInfoByPair[rateInfo.toPair] = edgeInfo.rateInfo
     exchangeInfoByPair[rateInfo.toBackwardPair] = edgeInfo.backwardRateInfo
   }
   
-  private func updateExchangesPairs(with rateInfo: RateInfo, currency: Currency) {
+  private func updateExchangesPairs(with rateInfo: RateInfo<RateT>, currency: Currency) {
     
     var allExchanges = allExchangesByCurrency[currency] ?? Set()
     
@@ -132,7 +133,7 @@ public final class RatesTable {
       //update pair
       let source = Vertex(currency: currency, exchange: rateInfo.exchange)
       let destination = Vertex(currency: currency, exchange: exchange)
-      let exchangeInfo = ExchangeInfo(weight: 1, date: rateInfo.date)
+      let exchangeInfo = ExchangeInfo(weight: RateT.e(), date: rateInfo.date)
       
       let pair = Pair(source: source, destination: destination)
       update(pair: pair, exchangeInfo: exchangeInfo)
@@ -146,13 +147,13 @@ public final class RatesTable {
     allExchangesByCurrency[currency] = allExchanges
   }
   
-  private func updateExchangesPairs(with rateInfo: RateInfo) {
+  private func updateExchangesPairs(with rateInfo: RateInfo<RateT>) {
     
     updateExchangesPairs(with: rateInfo, currency: rateInfo.source)
     updateExchangesPairs(with: rateInfo, currency: rateInfo.destination)
   }
   
-  public func update(rateInfo: RateInfo) {
+  public func update(rateInfo: RateInfo<RateT>) {
     
     allExchanges.insert(rateInfo.exchange)
     
@@ -174,14 +175,14 @@ public final class RatesTable {
     update(pair: backwardPair, exchangeInfo: backwardExchangeInfo)
   }
   
-  public func getRate(for path: [VertexIndex]) -> Double? {
+  public func getRate(for path: [VertexIndex]) -> RateT? {
     
     if path.count < 2 {
       return nil
     }
     
     var index = 1
-    var result = 1.0
+    var result = RateT.e()
     
     while index < path.count {
       let pair = Pair(source: path[index - 1].vertex, destination: path[index].vertex)
@@ -194,7 +195,7 @@ public final class RatesTable {
         continue
       }
       
-      result = result * exchangeInfo.exchangeInfo.weight
+      result = result.op(exchangeInfo.exchangeInfo.weight)
     }
     
     return result
