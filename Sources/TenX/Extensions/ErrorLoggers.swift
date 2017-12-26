@@ -38,6 +38,8 @@ extension RateInfoValidationError {
       error.message("Error: invalid Backward weight: \(rate), should be less or equal to \(maximumRate) pair: \(info)")
     case .invalidSourceOrDestination(let info):
       error.message("Error invalid source/destination for pair: \(info)")
+    case .negatoveWeight(let info):
+      error.message("Error invalid weight/source for pair: \(info)")
     }
   }
 }

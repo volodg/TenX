@@ -13,6 +13,7 @@ enum RateInfoValidationError: Error {
   case invalidWeight(info: RateInfo, rate: Double, maximumRate: Double)
   case invalidBackwardWeight(info: RateInfo, rate: Double, maximumRate: Double)
   case invalidSourceOrDestination(info: RateInfo)
+  case negatoveWeight(info: RateInfo)
 }
 
 extension RateInfo {
@@ -99,8 +100,12 @@ extension RateInfo {
   
   func validationError(appLogic: AppLogic) -> RateInfoValidationError? {
     
-    if source == destination {
+    guard source != destination else {
       return .invalidSourceOrDestination(info: self)
+    }
+    
+    guard weight >= 0.0 && backwardWeight >= 0.0 else {
+      return .negatoveWeight(info: self)
     }
     
     switch appLogic.strategy {
