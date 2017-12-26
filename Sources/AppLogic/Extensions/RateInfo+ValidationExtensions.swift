@@ -5,10 +5,8 @@
 //  Created by Volodymyr  Gorbenko on 24/12/17.
 //
 
-//import Foundation
 import RatesTable
 import Commons
-//import ExchangeRateCalculator
 
 public enum RateInfoValidationError<RateT>: Error {
   case invalidWeight(info: RateInfo<RateT>, rate: RateT, maximumRate: RateT)
