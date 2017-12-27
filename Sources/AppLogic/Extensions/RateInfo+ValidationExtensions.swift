@@ -53,6 +53,9 @@ extension RateInfo where RateT: Maximum & Group {
     
     //do not check current edge, because it going to be replaced
     let oldEdgeInfo = appLogic.disableEdges(for: self)
+    if oldEdgeInfo == nil {
+      //TODO add zero weight edge here instead of enumerating exchanges
+    }
     defer {
       //enable current edge
       if let oldEdgeInfo = oldEdgeInfo {
