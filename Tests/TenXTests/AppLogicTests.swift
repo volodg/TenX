@@ -193,7 +193,7 @@ final class AppLogicTests: XCTestCase {
       switch result {
       case .success:
         break
-      case .failure(let error):
+      case .failure:
         XCTFail()
       }
     }
