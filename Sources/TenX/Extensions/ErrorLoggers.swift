@@ -21,8 +21,8 @@ extension AppLogic.GetRateError {
       errorLogger.message("invalid destination currency: \(exchangeRateRequestInfo.destinationCurrency)")
     case .invalidBestRatesPath(let error):
       errorLogger.message("Critical error: best rate's path: \(error)")
-    case .invalidRate(let path):
-      errorLogger.message("Critical error: invalid rate's path: \(path)")
+    case .noRateForPath(let path):
+      errorLogger.message("Critical error: no rate for path: \(path)")
     }
   }
 }

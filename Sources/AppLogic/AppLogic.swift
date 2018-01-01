@@ -83,7 +83,7 @@ public final class AppLogic<RateT: Group & Maximum> {
     case undefinedSouce
     case undefinedDestination
     case invalidBestRatesPath(error: ExchangeRateCalculator<VertexIndex,RateT>.BestRatesPathError)
-    case invalidRate(path: [VertexIndex])
+    case noRateForPath(path: [VertexIndex])
   }
   
   public struct PathRateInfo {
@@ -164,7 +164,7 @@ public final class AppLogic<RateT: Group & Maximum> {
     
     return bestRatesPath(for: pair).flatMap { vertexIndexes in
       guard let rate = ratesTable.getRate(for: vertexIndexes) else {
-        return .failure(.invalidRate(path: vertexIndexes))
+        return .failure(.noRateForPath(path: vertexIndexes))
       }
       
       let path = vertexIndexes.map { $0.vertex }

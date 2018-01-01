@@ -167,6 +167,56 @@ final class AppLogicTests: XCTestCase {
     }
   }
   
+  private let twoSeparateEdges: [(exchange: String, source: String, destination: String, rate: Double, backwardRate: Double)] = [
+    ("GDAX", "A", "B", 1, -1),
+    ("GDAX", "C", "D", 1, -1),
+    ]
+  
+  private lazy var twoSeparateEdgesRatesInfo: [RateInfo<RateGroupType>] = {
+    return self.twoSeparateEdges.map { el in
+      RateInfo<RateGroupType>(
+        source: Currency(rawValue: el.source),
+        destination: Currency(rawValue: el.destination),
+        exchange: Exchange(rawValue: el.exchange),
+        weight: RateGroupType(rawValue: el.rate),
+        backwardWeight: RateGroupType(rawValue: el.backwardRate),
+        date: Date()
+      )
+    }
+  }()
+  
+  func testNoPath() {
+    let appLogic = AppLogic<RateGroupType>(strategy: .strict)
+    
+    twoSeparateEdgesRatesInfo.forEach { el in
+      let result = appLogic.update(rateInfo: el)
+      switch result {
+      case .success:
+        break
+      case .failure(let error):
+        XCTFail()
+      }
+    }
+    
+    let result = appLogic.getRateInfo(
+      sourceCurrency: Currency(rawValue: "A"),
+      sourceExchange: Exchange(rawValue: "GDAX"),
+      destinationCurrency: Currency(rawValue: "D"),
+      destinationExchange: Exchange(rawValue: "GDAX"))
+    
+    switch result {
+    case .success:
+      XCTFail()
+    case .failure(let error):
+      switch error {
+      case .noRateForPath:
+        break
+      default:
+        XCTFail()
+      }
+    }
+  }
+  
   static var allTests = [
     ("testStrictMode", testStrictMode),
     ("testRemoveCycles", testRemoveCycles),
